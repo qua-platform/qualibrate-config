@@ -9,7 +9,7 @@ from qualibrate_config.vars import (
 )
 
 if sys.version_info[:2] < (3, 11):
-    import tomli as tomllib
+    import tomli as tomllib  # type: ignore
 else:
     import tomllib
 
@@ -55,7 +55,7 @@ def read_config_file(
     config_file: Path, solve_references: bool = True
 ) -> dict[str, Any]:
     with config_file.open("rb") as fin:
-        config = tomllib.load(fin)
+        config: dict[str, Any] = tomllib.load(fin)  # typing for mypy tomli
     if not solve_references:
         return config
     return resolve_references(config)

@@ -1,16 +1,19 @@
 from pathlib import Path
-from typing import Optional
+from typing import ClassVar, Optional
 
 from pydantic import field_serializer
 from pydantic_core.core_schema import FieldSerializationInfo
-from pydantic_settings import BaseSettings, SettingsConfigDict
+from pydantic_settings import SettingsConfigDict
 
+from qualibrate_config.models.base.base_referenced_settings import BaseReferencedSettings
+from qualibrate_config.models.base.referenced_type import ModelReferencedType
 from qualibrate_config.models.storage import (
     StorageSettings,
     StorageSettingsBase,
     StorageSettingsSetup,
 )
 from qualibrate_config.models.versioned import Versioned
+from qualibrate_config.vars import QUALIBRATE_SETTINGS_ENV_PREFIX
 
 __all__ = [
     "QualibrateSettings",
@@ -19,12 +22,15 @@ __all__ = [
 ]
 
 
-class QualibrateSettingsBase(BaseSettings, Versioned):
-    model_config = SettingsConfigDict(extra="ignore")
+class QualibrateSettingsBase(BaseReferencedSettings, Versioned):
+    model_config: ClassVar[SettingsConfigDict] = SettingsConfigDict(
+        extra="ignore",
+        env_prefix=QUALIBRATE_SETTINGS_ENV_PREFIX,
+    )
 
     project: Optional[str]
     storage: StorageSettingsBase
-    log_folder: Optional[Path] = None
+    log_folder: Optional[ModelReferencedType[Path]] = None
 
 
 class QualibrateSettingsSetup(QualibrateSettingsBase):
