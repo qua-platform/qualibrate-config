@@ -1,12 +1,14 @@
 import os
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any, Optional, TypeVar
 
-from qualibrate_config.file import get_config_file
+from qualibrate_config.file import get_config_file, read_config_file
 from qualibrate_config.models import ActiveMachineSettings, QualibrateSettings
+from qualibrate_config.models.base.base_referenced_settings import (
+    BaseReferencedSettings,
+)
 from qualibrate_config.validation import (
     get_config_model_or_print_error,
-    get_config_solved_references_or_print_error,
 )
 from qualibrate_config.vars import (
     ACTIVE_MACHINE_CONFIG_KEY,
@@ -20,9 +22,13 @@ from qualibrate_config.vars import (
 __all__ = [
     "get_active_machine_config_path",
     "get_active_machine_settings",
+    "get_config_dict",
+    "get_config_model",
     "get_qualibrate_config_path",
     "get_qualibrate_settings",
 ]
+
+ConfigModel = TypeVar("ConfigModel", bound=BaseReferencedSettings)
 
 
 def get_qualibrate_config_path() -> Path:
@@ -51,6 +57,51 @@ def get_active_machine_config_path() -> Path:
     )
 
 
+def get_config_dict(
+    config_path: Path,
+    config_key: str,
+    config: Optional[dict[str, Any]] = None,
+) -> dict[str, Any]:
+    if config is None or config_key in config_key not in config:
+        config = read_config_file(config_path, solve_references=False)
+    if config is None:
+        raise RuntimeError("Couldn't read config file")
+    return dict(config.get(config_key, {}))
+
+
+def get_config_model(
+    config_path: Path,
+    config_key: str,
+    config_model_class: type[ConfigModel],
+    config: Optional[dict[str, Any]] = None,
+) -> ConfigModel:
+    """Retrieve the configuration settings.
+
+        Args:
+        config_path: Path to the configuration file.
+        config: Optional pre-loaded configuration data. If not provided, it
+            will load and resolve references from the config file.
+
+    Returns:
+        An instance of QualibrateSettings with the loaded configuration.
+
+    Raises:
+        RuntimeError: If the configuration file cannot be read or if the
+            configuration state is invalid.
+    """
+    model_config_dict = get_config_dict(config_path, config_key, config)
+    settings = get_config_model_or_print_error(
+        model_config_dict,
+        config_model_class,
+        config_key,
+    )
+    if settings is None:
+        raise RuntimeError(
+            f"Invalid config {config_model_class.__name__} state"
+        )
+    return settings
+
+
 def get_qualibrate_settings(
     config_path: Path,
     config: Optional[dict[str, Any]] = None,
@@ -69,18 +120,12 @@ def get_qualibrate_settings(
         RuntimeError: If the configuration file cannot be read or if the
             configuration state is invalid.
     """
-    if config is None:
-        config = get_config_solved_references_or_print_error(config_path)
-    if config is None:
-        raise RuntimeError("Couldn't read config file")
-    qs = get_config_model_or_print_error(
-        config.get(QUALIBRATE_CONFIG_KEY, {}),
-        QualibrateSettings,
-        QUALIBRATE_CONFIG_KEY,
+    return get_config_model(
+        config_path,
+        config_key=QUALIBRATE_CONFIG_KEY,
+        config_model_class=QualibrateSettings,
+        config=config,
     )
-    if qs is None:
-        raise RuntimeError("Invalid config state")
-    return qs
 
 
 def get_active_machine_settings(
@@ -101,15 +146,9 @@ def get_active_machine_settings(
         RuntimeError: If the configuration file cannot be read or if the
             configuration state is invalid.
     """
-    if config is None:
-        config = get_config_solved_references_or_print_error(config_path)
-    if config is None:
-        raise RuntimeError("Couldn't read config file")
-    ams = get_config_model_or_print_error(
-        config.get(ACTIVE_MACHINE_CONFIG_KEY, {}),
-        ActiveMachineSettings,
-        ACTIVE_MACHINE_CONFIG_KEY,
+    return get_config_model(
+        config_path,
+        config_key=ACTIVE_MACHINE_CONFIG_KEY,
+        config_model_class=ActiveMachineSettings,
+        config=config,
     )
-    if ams is None:
-        raise RuntimeError("Invalid config state")
-    return ams

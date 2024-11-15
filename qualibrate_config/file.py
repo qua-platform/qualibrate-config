@@ -3,6 +3,7 @@ from pathlib import Path
 from typing import Any, Optional, Union
 
 from qualibrate_config.references.resolvers import resolve_references
+from qualibrate_config.storage import STORAGE
 from qualibrate_config.vars import (
     DEFAULT_CONFIG_FILENAME,
     QUALIBRATE_PATH,
@@ -56,6 +57,8 @@ def read_config_file(
 ) -> dict[str, Any]:
     with config_file.open("rb") as fin:
         config: dict[str, Any] = tomllib.load(fin)  # typing for mypy tomli
+    # TODO: should be recursive update or just overwrite?
+    STORAGE.update(config)
     if not solve_references:
         return config
     return resolve_references(config)

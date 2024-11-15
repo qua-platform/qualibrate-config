@@ -11,6 +11,16 @@ class Reference(BaseModel):
     value: Any = None
     solved: bool = False
 
+    def __hash__(self) -> int:
+        return hash(
+            (
+                self.config_path,
+                self.reference_path,
+                self.index_start,
+                self.index_end,
+            )
+        )
+
 
 class PathWithSolvingReferences(BaseModel):
     config_path: str

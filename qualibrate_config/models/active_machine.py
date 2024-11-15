@@ -4,8 +4,10 @@ from typing import ClassVar, Optional
 from pydantic import field_serializer
 from pydantic_settings import SettingsConfigDict
 
-from qualibrate_config.models.base.base_referenced_settings import \
-    BaseReferencedSettings
+from qualibrate_config.models.base.base_referenced_settings import (
+    BaseReferencedSettings,
+)
+from qualibrate_config.models.base.referenced_type import ModelReferencedType
 from qualibrate_config.models.path_serializer import PathSerializer
 from qualibrate_config.vars import ACTIVE_MACHINE_SETTINGS_ENV_PREFIX
 
@@ -21,7 +23,7 @@ class ActiveMachineSettingsBase(BaseReferencedSettings, PathSerializer):
         env_prefix=ACTIVE_MACHINE_SETTINGS_ENV_PREFIX
     )
 
-    path: Optional[Path] = None
+    path: Optional[ModelReferencedType[Path]] = None
 
 
 class ActiveMachineSettingsSetup(ActiveMachineSettingsBase):

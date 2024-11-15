@@ -5,7 +5,9 @@ from pydantic import field_serializer
 from pydantic_core.core_schema import FieldSerializationInfo
 from pydantic_settings import SettingsConfigDict
 
-from qualibrate_config.models.base.base_referenced_settings import BaseReferencedSettings
+from qualibrate_config.models.base.base_referenced_settings import (
+    BaseReferencedSettings,
+)
 from qualibrate_config.models.base.referenced_type import ModelReferencedType
 from qualibrate_config.models.storage import (
     StorageSettings,

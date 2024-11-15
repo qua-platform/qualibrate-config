@@ -1,9 +1,11 @@
+from collections import defaultdict
 from unittest.mock import call
 
 import pytest
 
 from qualibrate_config.references import models as ref_models
 from qualibrate_config.references import resolvers as ref_resolvers
+from qualibrate_config.references.models import Reference
 
 
 @pytest.fixture
@@ -296,19 +298,63 @@ def test__resolve_references_with_subref(config_with_refs, path_with_refs):
     }
 
 
-def test_resolve_references_with_cycle(mocker):
+def test_no_cycle_or_error_with_cycle(mocker):
     cycle = ["a", "b", "a"]
-    mocker.patch(
-        "qualibrate_config.references.resolvers.find_all_references",
-    )
-    mocker.patch(
+    patched_check_cycles = mocker.patch(
         "qualibrate_config.references.resolvers.check_cycles_in_references",
         return_value=(True, cycle),
     )
     with pytest.raises(ValueError) as ex:
-        ref_resolvers.resolve_references({"a": "${#/b}", "b": "${#/a}"})
+        ref_resolvers.no_cycle_or_error(
+            [
+                Reference(
+                    config_path="a",
+                    reference_path="/b",
+                    index_start=0,
+                    index_end=4,
+                ),
+                Reference(
+                    config_path="b",
+                    reference_path="/a",
+                    index_start=0,
+                    index_end=4,
+                ),
+            ]
+        )
+    patched_check_cycles.assert_called_once_with(
+        defaultdict(list, **{"a": ["/b"], "b": ["/a"]})
+    )
     assert ex.type is ValueError
     assert ex.value.args == (f"Config contains cycle: {cycle}",)
+
+
+def test_no_cycle_or_error_no_cycle(mocker):
+    patched_check_cycles = mocker.patch(
+        "qualibrate_config.references.resolvers.check_cycles_in_references",
+        return_value=(False, None),
+    )
+    assert (
+        ref_resolvers.no_cycle_or_error(
+            [
+                Reference(
+                    config_path="a",
+                    reference_path="/b",
+                    index_start=0,
+                    index_end=4,
+                ),
+                Reference(
+                    config_path="b",
+                    reference_path="/c",
+                    index_start=0,
+                    index_end=4,
+                ),
+            ]
+        )
+        is None
+    )
+    patched_check_cycles.assert_called_once_with(
+        defaultdict(list, **{"a": ["/b"], "b": ["/c"]})
+    )
 
 
 def test_resolve_references_full_no_subref():
