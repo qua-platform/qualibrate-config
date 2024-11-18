@@ -7,7 +7,7 @@ from qualibrate_config.models.base.referenced_type import (
     is_referenced_type,
 )
 
-_BaseConfigAttributes = dir(BaseSettings)
+_BaseConfigAttributes = (*dir(BaseSettings), "_is_ref")
 
 
 def _is_reference_field(annotation: Optional[type]) -> bool:
@@ -46,8 +46,25 @@ class BaseReferencedSettings(BaseSettings):
             raise AttributeError(f"There is no field {attr_name}")
         is_ref = self._is_ref(attr_name, field.annotation)
         if is_ref:
-            return attr.get_value()
+            return attr.get_value() if attr is not None else None
         return attr
+
+    def __setattr__(self, attr_name: str, value: Any) -> None:
+        attr = super().__getattribute__(attr_name)
+        if attr_name in _BaseConfigAttributes:
+            super().__setattr__(attr_name, value)
+            self._is_referenced_fields.pop(attr_name)
+            return
+        field = self.model_fields.get(attr_name)
+        if field is None:
+            raise AttributeError(f"There is no field {attr_name}")
+        is_ref = self._is_ref(attr_name, field.annotation)
+        if is_ref:
+            attr.set_value(value)
+        else:
+            super().__setattr__(attr_name, value)
+        self._is_referenced_fields.pop(attr_name)
+        return
 
     def get_reference(self, attr_name: str) -> Optional[str]:
         field = self.model_fields.get(attr_name)

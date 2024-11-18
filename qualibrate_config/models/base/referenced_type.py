@@ -1,5 +1,5 @@
 from inspect import isclass
-from typing import Annotated, Any, Generic, Optional, cast
+from typing import Annotated, Any, Generic, Optional, Union, cast, get_origin
 
 from pydantic import GetCoreSchemaHandler
 from pydantic_core import core_schema
@@ -45,6 +45,35 @@ class ReferencedType(Generic[T]):
         value = resolve_single_item(STORAGE, cast(str, self.referenced_value))
         return self._type(value)  # type: ignore
 
+    def set_value(self, value: Union[str, T]) -> None:
+        # TODO: should we allow overwrite references or values?
+        is_passed_ref = isinstance(value, str) and TEMPLATE_START in value
+        expected_type = cast(
+            type, type(self.value) if self.value is not None else self._type
+        )
+        if is_passed_ref:
+            # passed ref
+            ref = str(value)
+            resolved_value = resolve_single_item(STORAGE, ref)
+            try:
+                expected_type(resolved_value)
+            except ValueError as ex:
+                raise ValueError(
+                    f"Invalid argument type. Passed reference: {value}. "
+                    f"Resolved to value {resolved_value} "
+                    f"(type = {type(resolved_value)}). "
+                    f"Expected: {expected_type}"
+                ) from ex
+            self.referenced_value = ref
+        else:
+            try:
+                self.value = expected_type(value)
+            except ValueError as ex:
+                raise ValueError(
+                    f"Invalid argument type. Passed: {type(value)}. "
+                    f"Expected: {expected_type}"
+                ) from ex
+
     def __str__(self) -> str:
         return f"{self.value}({self.referenced_value})"
 
@@ -62,8 +91,10 @@ class _ReferencedTypePydanticAnnotation:
         source_type: Any,
         handler: GetCoreSchemaHandler,
     ) -> core_schema.CoreSchema:
-        args = get_args(source_type)
-        template_type = args[0]
+        arg = get_args(source_type)[0]
+        template_type = (
+            get_args(arg)[0] if get_origin(arg) is Annotated else arg
+        )
         type_schema = handler.generate_schema(template_type)
 
         def validate_from_value(value: Any) -> ReferencedType[T]:
