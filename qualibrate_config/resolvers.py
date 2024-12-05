@@ -62,7 +62,7 @@ def get_config_dict(
     config_key: str,
     config: Optional[dict[str, Any]] = None,
 ) -> dict[str, Any]:
-    if config is None or config_key in config_key not in config:
+    if config is None or config_key not in config:
         config = read_config_file(config_path, solve_references=False)
     if config is None:
         raise RuntimeError("Couldn't read config file")
