@@ -83,6 +83,99 @@ def path_with_refs():
     }
 
 
+def test_find_references_no_references(mocker):
+    mock_find_refs = mocker.patch(
+        "qualibrate_config.references.resolvers.find_references_in_str",
+        return_value=list(),
+    )
+    config = {"base": "${#/ref}"}
+    result = ref_resolvers.find_references_from_base(config, "/base")
+    assert result == set()
+    mock_find_refs.assert_called_once_with(config["base"], "/base")
+
+
+def test_find_references_valid(mocker):
+    doc = {
+        "base": "${#/nested/ref1}",
+        "nested": {"ref1": "${#/nested/ref2}", "ref2": "value"},
+    }
+    ref_base = Reference(
+        config_path="/base",
+        reference_path="/nested/ref1",
+        index_start=0,
+        index_end=15,
+    )
+    ref_nested = Reference(
+        config_path="/nested/ref1",
+        reference_path="/nested/ref2",
+        index_start=0,
+        index_end=15,
+    )
+    find_references_in_str = [[ref_base], [ref_nested], []]
+    mocked_find_ref_in_str = mocker.patch(
+        "qualibrate_config.references.resolvers.find_references_in_str",
+        side_effect=find_references_in_str,
+    )
+    result = ref_resolvers.find_references_from_base(doc, "/base")
+    assert result == {ref_base, ref_nested}
+    mocked_find_ref_in_str.assert_has_calls(
+        [
+            call("${#/nested/ref1}", "/base"),
+            call("${#/nested/ref2}", "/nested/ref1"),
+        ]
+    )
+
+
+def test_find_references_cyclic(mocker):
+    doc = {"base": "${#/cyclic}", "cyclic": "${#/cyclic}"}
+    ref_base = Reference(
+        config_path="/base",
+        reference_path="/cyclic",
+        index_start=0,
+        index_end=15,
+    )
+    ref_cyclic = Reference(
+        config_path="/cyclic",
+        reference_path="/cyclic",
+        index_start=0,
+        index_end=15,
+    )
+    find_references_in_str = [[ref_base], [ref_cyclic], [ref_cyclic]]
+    mocked_find_ref_in_str = mocker.patch(
+        "qualibrate_config.references.resolvers.find_references_in_str",
+        side_effect=find_references_in_str,
+    )
+    result = ref_resolvers.find_references_from_base(doc, "/base")
+    assert result == {ref_base, ref_cyclic}
+    mocked_find_ref_in_str.assert_has_calls(
+        [
+            call("${#/cyclic}", "/base"),
+            call("${#/cyclic}", "/cyclic"),
+            call("${#/cyclic}", "/cyclic"),
+        ]
+    )
+    assert mocked_find_ref_in_str.call_count == 3
+
+
+def test_find_references_unresolvable(mocker):
+    broken_ref = Reference(
+        config_path="/base",
+        reference_path="/missing",
+        index_start=0,
+        index_end=15,
+    )
+    mocker.patch(
+        "qualibrate_config.references.resolvers.find_references_in_str",
+        return_value=[broken_ref],
+    )
+    with pytest.raises(
+        ValueError, match=f"Reference {broken_ref} can't be resolved"
+    ):
+        ref_resolvers.find_references_from_base(
+            {"base": "${#/missing}"}, "/base"
+        )
+
+
 def test_find_all_references_mapping_item(mocker):
     find_ref_spy = mocker.spy(ref_resolvers, "find_all_references")
     assert ref_resolvers.find_all_references({"key": {"a": 1}}) == []
@@ -355,6 +448,61 @@ def test_no_cycle_or_error_no_cycle(mocker):
     patched_check_cycles.assert_called_once_with(
         defaultdict(list, **{"a": ["/b"], "b": ["/c"]})
     )
+
+
+def test_resolve_single_item_value_found(mocker):
+    doc = {"key": "resolved"}
+    references = {
+        ref_models.Reference(
+            config_path="/data_handler/root",
+            reference_path="/data_handler/project",
+            index_start=0,
+            index_end=15,
+        )
+    }
+    mocked_find_ref = mocker.patch(
+        "qualibrate_config.references.resolvers.find_references_from_base",
+        return_value=references,
+    )
+    mocked_resolve_common = mocker.patch(
+        "qualibrate_config.references.resolvers._resolve_common",
+        return_value={
+            "/_qualibrate_ref_to_resolve": ref_models.PathWithSolvingReferences(
+                config_path="/_qualibrate_ref_to_resolve",
+                value="resolved",
+                solved=True,
+                references=[],
+            )
+        },
+    )
+    to_resolve = "${#/key}"
+    assert ref_resolvers.resolve_single_item(doc, to_resolve) == "resolved"
+    updated_config = {**doc, "_qualibrate_ref_to_resolve": to_resolve}
+    mocked_find_ref.assert_called_once_with(
+        updated_config, "/_qualibrate_ref_to_resolve"
+    )
+    mocked_resolve_common.assert_called_once_with(
+        updated_config, list(references)
+    )
+
+
+def test_resolve_single_item_value_not_found(mocker):
+    doc = {"key": "resolved"}
+    mocked_find_ref = mocker.patch(
+        "qualibrate_config.references.resolvers.find_references_from_base",
+        return_value=set(),
+    )
+    mocked_resolve_common = mocker.patch(
+        "qualibrate_config.references.resolvers._resolve_common",
+        return_value={},
+    )
+    to_resolve = "${#/key}"
+    assert ref_resolvers.resolve_single_item(doc, to_resolve) is None
+    updated_config = {**doc, "_qualibrate_ref_to_resolve": to_resolve}
+    mocked_find_ref.assert_called_once_with(
+        updated_config, "/_qualibrate_ref_to_resolve"
+    )
+    mocked_resolve_common.assert_called_once_with(updated_config, list())
 
 
 def test_resolve_references_full_no_subref():
