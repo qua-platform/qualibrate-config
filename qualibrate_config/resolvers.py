@@ -1,6 +1,8 @@
 import os
 from pathlib import Path
-from typing import Any, Optional, TypeVar
+from typing import Any, Optional, TypeVar, cast
+
+import jsonpointer
 
 from qualibrate_config.file import get_config_file, read_config_file
 from qualibrate_config.models import ActiveMachineSettings, QualibrateSettings
@@ -59,14 +61,41 @@ def get_active_machine_config_path() -> Path:
 
 def get_config_dict(
     config_path: Path,
-    config_key: str,
+    config_key: Optional[str],
     config: Optional[dict[str, Any]] = None,
 ) -> dict[str, Any]:
-    if config is None or config_key not in config:
+    if config is None or config_key is None or config_key not in config:
         config = read_config_file(config_path, solve_references=False)
     if config is None:
         raise RuntimeError("Couldn't read config file")
-    return dict(config.get(config_key, {}))
+    return dict(config.get(cast(str, config_key), {}))
+
+
+def get_config_dict_from_subpath(
+    config_path: Path,
+    subpath: Optional[str],
+    config: Optional[dict[str, Any]] = None,
+) -> dict[str, Any]:
+    """
+    Retrieves a configuration dictionary and optionally resolves a subpath
+    within it.
+
+    Args:
+        config_path: The path to the configuration file.
+        subpath: The optional JSON pointer string indicating the subpath
+            within the configuration dictionary to retrieve. If None, the
+            entire configuration dictionary is returned.
+        config: An optional existing configuration dictionary to use instead
+            of reading from the file. Defaults to None.
+
+    Returns:
+        A dictionary representing the configuration or the resolved subpath
+        within it.
+    """
+    config_dict = get_config_dict(config_path, None, config)
+    if subpath is None:
+        return config_dict
+    return dict(jsonpointer.resolve_pointer(config_dict, subpath))
 
 
 def get_config_model(
