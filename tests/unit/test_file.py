@@ -2,7 +2,6 @@ import pytest
 import tomli_w
 
 from qualibrate_config import file as qc_file
-from qualibrate_config.storage import STORAGE
 from qualibrate_config.vars import DEFAULT_CONFIG_FILENAME
 
 
@@ -79,10 +78,3 @@ def test_read_config_file_with_references(mocker, config_dir):
     mocked_resolve_refs.assert_called_once_with(
         {"default_key": "default_value"}
     )
-
-
-def test_storage_update_on_read(config_dir):
-    config_file = config_dir / DEFAULT_CONFIG_FILENAME
-    STORAGE.clear()  # Ensure STORAGE is empty before the test
-    qc_file.read_config_file(config_file, solve_references=False)
-    assert STORAGE["default_key"] == "default_value"

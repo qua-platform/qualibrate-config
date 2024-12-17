@@ -1,4 +1,3 @@
-from collections.abc import Mapping
 from pathlib import Path
 from typing import (
     Any,
@@ -8,14 +7,11 @@ from typing import (
 
 import click
 from pydantic import ValidationError
-from pydantic_settings import BaseSettings
 
 from qualibrate_config.file import read_config_file
+from qualibrate_config.models import BaseConfig
 
-T = TypeVar(
-    "T",
-    bound=BaseSettings,
-)
+T = TypeVar("T", bound=BaseConfig)
 
 SUGGEST_MSG = (
     "Can't parse existing config. Fix it or overwrite "
@@ -35,18 +31,19 @@ def get_config_solved_references_or_print_error(
 
 
 def get_config_model_or_print_error(
-    config: Mapping[str, Any],
+    config: dict[str, Any],
     model_type: type[T],
-    config_key: str,
+    config_key: Optional[str],
 ) -> Optional[T]:
     try:
-        return model_type(**config)
+        return model_type(config)
     except ValidationError as ex:
+        prefix = [config_key] if config_key else []
         errors = [
             (
                 f"Message: {error.get('msg')}. "
                 "Path: "
-                f"{'.'.join([config_key, *map(str, error.get('loc', []))])}. "
+                f"{'.'.join([*prefix, *map(str, error.get('loc', []))])}. "
                 f"Value: {error.get('input')}"
             )
             for error in ex.errors()

@@ -1,15 +1,14 @@
 from os import sep as os_sep
 from pathlib import Path
 
-from pydantic_core.core_schema import FieldSerializationInfo
-
 from qualibrate_config.references.resolvers import TEMPLATE_START
 
 __all__ = ["PathSerializer"]
 
 
 class PathSerializer:
-    def serialize_path(self, path: Path, _info: FieldSerializationInfo) -> str:
+    @staticmethod
+    def serialize_path(path: Path) -> str:
         str_path = str(path)
         if os_sep == "/":
             return str_path

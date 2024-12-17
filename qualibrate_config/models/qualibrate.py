@@ -1,50 +1,34 @@
 from pathlib import Path
-from typing import ClassVar, Optional
+from typing import Optional
 
-from pydantic import field_serializer
-from pydantic_core.core_schema import FieldSerializationInfo
-from pydantic_settings import SettingsConfigDict
-
-from qualibrate_config.models.base.base_referenced_settings import (
-    BaseReferencedSettings,
+from qualibrate_config.models.base.config_base import BaseConfig
+from qualibrate_config.models.calibration_library import (
+    CalibrationLibraryConfig,
 )
-from qualibrate_config.models.base.referenced_type import ModelReferencedType
+from qualibrate_config.models.composite import QualibrateCompositeConfig
+from qualibrate_config.models.q_app import QualibrateAppConfig
+from qualibrate_config.models.remote_services import (
+    QualibrateRunnerRemoteServiceConfig,
+)
 from qualibrate_config.models.storage import (
-    StorageSettings,
-    StorageSettingsBase,
-    StorageSettingsSetup,
+    StorageConfig,
 )
-from qualibrate_config.models.versioned import Versioned
-from qualibrate_config.vars import QUALIBRATE_SETTINGS_ENV_PREFIX
 
-__all__ = [
-    "QualibrateSettings",
-    "QualibrateSettingsBase",
-    "QualibrateSettingsSetup",
-]
+__all__ = ["QualibrateConfig", "QualibrateTopLevelConfig"]
 
 
-class QualibrateSettingsBase(BaseReferencedSettings, Versioned):
-    model_config: ClassVar[SettingsConfigDict] = SettingsConfigDict(
-        extra="ignore",
-        env_prefix=QUALIBRATE_SETTINGS_ENV_PREFIX,
-    )
+class QualibrateConfig(BaseConfig):
+    version: int = 2
+    project: str = "init_project"
+    password: Optional[str] = None
+    log_folder: Optional[Path] = None
 
-    project: Optional[str]
-    storage: StorageSettingsBase
-    log_folder: Optional[ModelReferencedType[Path]] = None
-
-
-class QualibrateSettingsSetup(QualibrateSettingsBase):
-    storage: StorageSettingsSetup
-
-    @field_serializer("project")
-    def serialize_project(
-        self, value: Optional[str], _info: FieldSerializationInfo
-    ) -> str:
-        return value or ""
+    storage: StorageConfig
+    app: Optional[QualibrateAppConfig] = None
+    runner: Optional[QualibrateRunnerRemoteServiceConfig] = None
+    composite: Optional[QualibrateCompositeConfig] = None
+    calibration_library: Optional[CalibrationLibraryConfig] = None
 
 
-class QualibrateSettings(QualibrateSettingsBase):
-    project: str
-    storage: StorageSettings
+class QualibrateTopLevelConfig(BaseConfig):
+    qualibrate: QualibrateConfig
