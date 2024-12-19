@@ -1,6 +1,6 @@
 import os
 from pathlib import Path
-from typing import Any, Optional, TypeVar
+from typing import Any, Callable, Optional, TypeVar
 
 import jsonpointer
 
@@ -85,6 +85,9 @@ def get_config_model(
     config_key: Optional[str],
     config_class: type[ConfigClass] = QualibrateConfig,  # type: ignore
     config: Optional[dict[str, Any]] = None,
+    raw_config_validators: Optional[
+        list[Callable[[dict[str, Any]], None]]
+    ] = None,
 ) -> ConfigClass:
     """Retrieve the configuration settings.
 
@@ -101,6 +104,9 @@ def get_config_model(
             configuration state is invalid.
     """
     model_config_dict = get_config_dict(config_path, config_key, config)
+    if raw_config_validators:
+        for validator in raw_config_validators:
+            validator(model_config_dict)
     new_config = get_config_model_or_print_error(
         model_config_dict,
         config_class,
@@ -109,6 +115,15 @@ def get_config_model(
     if new_config is None:
         raise RuntimeError(f"Invalid config {config_class.__name__} state")
     return new_config
+
+
+def _version_validator(config: dict[str, Any]) -> None:
+    version = config.get("qualibrate", {}).get("version")
+    if version is None or version != QualibrateConfig.version:
+        raise RuntimeError(
+            "You have old version of config. "
+            "Please run `qualibrate-config migrate`."
+        )
 
 
 def get_qualibrate_config(
@@ -134,5 +149,10 @@ def get_qualibrate_config(
         config_key=None,
         config_class=QualibrateTopLevelConfig,
         config=config,
+        raw_config_validators=[_version_validator],
     )
     return model.qualibrate
+
+
+if __name__ == "__main__":
+    get_qualibrate_config(get_qualibrate_config_path())
