@@ -1,25 +1,24 @@
-import os
 import sys
-from collections.abc import Mapping
-from importlib.util import find_spec
-from itertools import filterfalse
 from pathlib import Path
 from typing import Any, Optional
 
 import click
 import tomli_w
-from click.core import ParameterSource
 
-from qualibrate_config.cli.utils.defaults import get_user_storage, \
-    get_qapp_static_file_path
+from qualibrate_config.cli.utils.approve import print_and_confirm
+from qualibrate_config.cli.utils.defaults import (
+    get_qapp_static_file_path,
+    get_user_storage,
+)
 from qualibrate_config.cli.utils.from_sources import config_from_sources
 from qualibrate_config.file import get_config_file
 from qualibrate_config.models import QualibrateConfig
-from qualibrate_config.models.storage_type import StorageType
 from qualibrate_config.models.qualibrate import QualibrateTopLevelConfig
-from qualibrate_config.references.resolvers import resolve_references
+from qualibrate_config.models.storage_type import StorageType
 from qualibrate_config.vars import (
-    QUALIBRATE_CONFIG_KEY, QUALIBRATE_PATH, DEFAULT_CONFIG_FILENAME
+    DEFAULT_CONFIG_FILENAME,
+    QUALIBRATE_CONFIG_KEY,
+    QUALIBRATE_PATH,
 )
 
 if sys.version_info[:2] < (3, 11):
@@ -40,50 +39,6 @@ def get_config(config_path: Path) -> tuple[dict[str, Any], Path]:
     return {}, config_file
 
 
-def _print_config(data: Mapping[str, Any], depth: int = 0) -> None:
-    if not len(data.keys()):
-        return
-    max_key_len = max(map(len, map(str, data.keys())))
-    non_mapping_items = list(
-        filterfalse(lambda item: isinstance(item[1], Mapping), data.items())
-    )
-    if len(non_mapping_items):
-        click.echo(
-            os.linesep.join(
-                f"{' ' * 4 * depth}{f'{k} :':<{max_key_len + 3}} {v}"
-                for k, v in non_mapping_items
-            )
-        )
-    mappings = filter(lambda x: isinstance(x[1], Mapping), data.items())
-    for mapping_k, mapping_v in mappings:
-        click.echo(f"{' ' * 4 * depth}{mapping_k} :")
-        _print_config(mapping_v, depth + 1)
-
-
-def _print_and_confirm(
-    config_file: Path,
-    exported_data: dict[str, Any],
-    check_generator: bool,
-) -> None:
-    click.echo(f"Config file path: {config_file}")
-    click.echo(click.style("Generated config:", bold=True))
-    _print_config(exported_data)
-    if check_generator:
-        exit(0)
-    confirmed = click.confirm("Do you confirm config?", default=True)
-    if not confirmed:
-        click.echo(
-            click.style(
-                (
-                    "The configuration has not been confirmed. "
-                    "Rerun config script."
-                ),
-                fg="yellow",
-            )
-        )
-        exit(1)
-
-
 def write_config(
     config_file: Path,
     common_config: dict[str, Any],
@@ -94,7 +49,7 @@ def write_config(
     exported_data = qs.serialize(exclude_none=True)
     common_config[QUALIBRATE_CONFIG_KEY] = exported_data
     if confirm or check_generator:
-        _print_and_confirm(config_file, common_config, check_generator)
+        print_and_confirm(config_file, common_config, check_generator)
     if qs.project in qs.storage.location.parts:
         qs.storage.location.mkdir(parents=True, exist_ok=True)
     else:
@@ -289,7 +244,4 @@ def config_command(
 
 
 if __name__ == "__main__":
-    config_command(
-        [],
-        standalone_mode=False
-    )
+    config_command([], standalone_mode=False)

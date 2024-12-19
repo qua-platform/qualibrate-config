@@ -1,6 +1,6 @@
 import click
 
-from qualibrate_config.cli.config import config_command
+from qualibrate_config.cli import config_command, migrate_command
 
 
 @click.group()
@@ -9,6 +9,7 @@ def cli() -> None:
 
 
 cli.add_command(config_command)
+cli.add_command(migrate_command)
 
 
 def main() -> None:
