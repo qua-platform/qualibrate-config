@@ -1,0 +1,14 @@
+from pathlib import Path
+
+__all__ = [
+    "CONFIG_PATH_ENV_NAME",
+    "QUALIBRATE_CONFIG_KEY",
+    "QUALIBRATE_PATH",
+    "DEFAULT_CONFIG_FILENAME",
+]
+CONFIG_PATH_ENV_NAME = "QUALIBRATE_CONFIG_FILE"
+
+QUALIBRATE_CONFIG_KEY = "qualibrate"
+
+QUALIBRATE_PATH = Path().home() / ".qualibrate"
+DEFAULT_CONFIG_FILENAME = "config.toml"
