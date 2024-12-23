@@ -16,6 +16,7 @@ from pydantic_core._pydantic_core import ValidationError
 
 from qualibrate_config.models.base.importable import Importable
 from qualibrate_config.models.base.path_serializer import PathSerializer
+from qualibrate_config.qulibrate_types import RawConfigType
 from qualibrate_config.references.resolvers import (
     TEMPLATE_START,
     resolve_single_item,
@@ -34,7 +35,7 @@ class BaseConfig:
 
     def __init__(
         self,
-        config: dict[str, Any],
+        config: RawConfigType,
         path: Optional[str] = None,
         root: Optional["BaseConfig"] = None,
     ) -> None:
@@ -43,9 +44,9 @@ class BaseConfig:
         Supports nested configurations, default values, and optional fields.
         """
         self._path = path or "/"
-        self._data: dict[str, Any] = {}
+        self._data: RawConfigType = {}
         self._annotations = self.get_annotations()
-        self._raw_dict: dict[str, Any] = {}
+        self._raw_dict: RawConfigType = {}
         self.__class__._root = root or self
 
         for key, value_type in self._annotations.items():
@@ -193,7 +194,7 @@ class BaseConfig:
         annotations.pop("_root", None)
         return annotations
 
-    def serialize(self, exclude_none: bool = True) -> dict[str, Any]:
+    def serialize(self, exclude_none: bool = True) -> RawConfigType:
         def _get_val(val: Any) -> Any:
             if isinstance(val, BaseConfig):
                 return val.serialize()

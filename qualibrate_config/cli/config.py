@@ -1,6 +1,6 @@
 import sys
 from pathlib import Path
-from typing import Any, Optional
+from typing import Optional
 
 import click
 import tomli_w
@@ -15,6 +15,7 @@ from qualibrate_config.file import get_config_file
 from qualibrate_config.models import QualibrateConfig
 from qualibrate_config.models.qualibrate import QualibrateTopLevelConfig
 from qualibrate_config.models.storage_type import StorageType
+from qualibrate_config.qulibrate_types import RawConfigType
 from qualibrate_config.vars import (
     DEFAULT_CONFIG_FILENAME,
     QUALIBRATE_CONFIG_KEY,
@@ -29,7 +30,7 @@ else:
 __all__ = ["config_command"]
 
 
-def get_config(config_path: Path) -> tuple[dict[str, Any], Path]:
+def get_config(config_path: Path) -> tuple[RawConfigType, Path]:
     """Returns config and path to file"""
     config_file = get_config_file(
         config_path, DEFAULT_CONFIG_FILENAME, raise_not_exists=False
@@ -41,7 +42,7 @@ def get_config(config_path: Path) -> tuple[dict[str, Any], Path]:
 
 def write_config(
     config_file: Path,
-    common_config: dict[str, Any],
+    common_config: RawConfigType,
     qs: QualibrateConfig,
     confirm: bool = True,
     check_generator: bool = False,

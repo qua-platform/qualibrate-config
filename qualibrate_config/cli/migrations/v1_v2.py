@@ -1,6 +1,7 @@
-from typing import Any, Optional
+from typing import Optional
 
 from qualibrate_config.cli.migrations.base import MigrateBase
+from qualibrate_config.qulibrate_types import RawConfigType
 
 
 class Migrate(MigrateBase):
@@ -8,8 +9,9 @@ class Migrate(MigrateBase):
     to_version: int = 2
 
     @staticmethod
-    def backward(data: dict[str, Any]) -> dict[str, Any]:
+    def backward(data: RawConfigType) -> RawConfigType:
         qualibrate = data.pop("qualibrate")
+        quam: Optional[RawConfigType] = data.pop("quam", None)
         qualibrate.pop("version")
         qualibrate["config_version"] = 1
 
@@ -17,9 +19,7 @@ class Migrate(MigrateBase):
         runner = qualibrate.pop("runner", None)
         composite = qualibrate.pop("composite", None)
         calibration_lib = qualibrate.pop("calibration_library", None)
-        new_data = {
-            "qualibrate": qualibrate,
-        }
+        new_data = {"qualibrate": qualibrate}
         if app:
             if runner:
                 app["runner"] = runner
@@ -33,18 +33,24 @@ class Migrate(MigrateBase):
                 "calibration_library_resolver": calibration_lib["resolver"],
                 "calibration_library_folder": calibration_lib["folder"],
             }
+        if quam is not None and "state_path" in quam:
+            new_data["active_machine"] = {"path": quam["state_path"]}
         return new_data
 
     @staticmethod
-    def forward(data: dict[str, Any]) -> dict[str, Any]:
+    def forward(data: RawConfigType) -> RawConfigType:
         new_qualibrate = data.pop("qualibrate")
         new_qualibrate.pop("config_version")
-        q_app: Optional[dict[str, Any]] = data.pop("qualibrate_app", None)
-        q_composite: Optional[dict[str, Any]] = data.pop(
+        q_app: Optional[RawConfigType] = data.pop("qualibrate_app", None)
+        q_composite: Optional[RawConfigType] = data.pop(
             "qualibrate_composite", None
         )
-        q_runner: Optional[dict[str, Any]] = data.pop("qualibrate_runner", None)
-        data.pop("active_machine", None)
+        q_runner: Optional[RawConfigType] = data.pop("qualibrate_runner", None)
+        active_machine: Optional[RawConfigType] = data.pop(
+            "active_machine", None
+        )
+        if active_machine is not None and "path" in active_machine:
+            data["quam"] = {"state_path": active_machine["path"]}
 
         if q_app:
             new_qualibrate["app"] = {

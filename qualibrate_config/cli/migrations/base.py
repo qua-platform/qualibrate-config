@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
-from typing import Any
+
+from qualibrate_config.qulibrate_types import RawConfigType
 
 
 class MigrateBase(ABC):
@@ -8,10 +9,10 @@ class MigrateBase(ABC):
 
     @staticmethod
     @abstractmethod
-    def backward(data: dict[str, Any]) -> dict[str, Any]:
+    def backward(data: RawConfigType) -> RawConfigType:
         pass
 
     @staticmethod
     @abstractmethod
-    def forward(data: dict[str, Any]) -> dict[str, Any]:
+    def forward(data: RawConfigType) -> RawConfigType:
         pass

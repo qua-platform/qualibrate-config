@@ -6,6 +6,7 @@ from typing import Any, Optional, cast
 import jsonpatch
 import jsonpointer
 
+from qualibrate_config.qulibrate_types import RawConfigType
 from qualibrate_config.references.models import (
     PathWithSolvingReferences,
     Reference,
@@ -250,14 +251,14 @@ def resolve_single_item(
     return needed.value if needed else None
 
 
-def resolve_references(config: dict[str, Any]) -> dict[str, Any]:
+def resolve_references(config: RawConfigType) -> RawConfigType:
     references = find_all_references(config)
     path_with_references = _resolve_common(config, references)
     patches = [
         {"op": "replace", "path": path.config_path, "value": path.value}
         for path in path_with_references.values()
     ]
-    return cast(dict[str, Any], jsonpatch.apply_patch(config, patches))
+    return cast(RawConfigType, jsonpatch.apply_patch(config, patches))
 
 
 if __name__ == "__main__":

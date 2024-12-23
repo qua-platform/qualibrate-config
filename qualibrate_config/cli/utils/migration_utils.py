@@ -1,5 +1,7 @@
 import importlib
-from typing import Any, Callable
+from typing import Callable
+
+from qualibrate_config.qulibrate_types import RawConfigType
 
 
 def migration_direction(from_version: int, to_version: int) -> bool:
@@ -8,7 +10,7 @@ def migration_direction(from_version: int, to_version: int) -> bool:
 
 def migration_functions(
     from_version: int, to_version: int
-) -> list[Callable[[dict[str, Any]], dict[str, Any]]]:
+) -> list[Callable[[RawConfigType], RawConfigType]]:
     direction = migration_direction(from_version, to_version)
     version_step = 1 if direction else -1
     versions = range(from_version, to_version, version_step)
@@ -30,8 +32,8 @@ def migration_functions(
 
 
 def make_migrations(
-    data: dict[str, Any], from_version: int, to_version: int
-) -> dict[str, Any]:
+    data: RawConfigType, from_version: int, to_version: int
+) -> RawConfigType:
     functions = migration_functions(from_version, to_version)
     for function in functions:
         data = function(data)

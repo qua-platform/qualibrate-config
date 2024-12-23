@@ -1,12 +1,16 @@
+import logging
 import os
+from functools import partial
 from pathlib import Path
-from typing import Any, Callable, Optional, TypeVar
+from typing import Callable, Optional, TypeVar
 
 import jsonpointer
 
+from qualibrate_config.cli import migrate_command
 from qualibrate_config.file import get_config_file, read_config_file
 from qualibrate_config.models import BaseConfig, QualibrateConfig
 from qualibrate_config.models.qualibrate import QualibrateTopLevelConfig
+from qualibrate_config.qulibrate_types import RawConfigType
 from qualibrate_config.validation import (
     get_config_model_or_print_error,
 )
@@ -42,8 +46,8 @@ def get_qualibrate_config_path() -> Path:
 def get_config_dict(
     config_path: Path,
     config_key: Optional[str],
-    config: Optional[dict[str, Any]] = None,
-) -> dict[str, Any]:
+    config: Optional[RawConfigType] = None,
+) -> RawConfigType:
     if config is None or config_key is None or config_key not in config:
         config = read_config_file(config_path, solve_references=False)
     if config is None:
@@ -56,8 +60,8 @@ def get_config_dict(
 def get_config_dict_from_subpath(
     config_path: Path,
     subpath: Optional[str],
-    config: Optional[dict[str, Any]] = None,
-) -> dict[str, Any]:
+    config: Optional[RawConfigType] = None,
+) -> RawConfigType:
     """
     Retrieves a configuration dictionary and optionally resolves a subpath
     within it.
@@ -84,9 +88,9 @@ def get_config_model(
     config_path: Path,
     config_key: Optional[str],
     config_class: type[ConfigClass] = QualibrateConfig,  # type: ignore
-    config: Optional[dict[str, Any]] = None,
+    config: Optional[RawConfigType] = None,
     raw_config_validators: Optional[
-        list[Callable[[dict[str, Any]], None]]
+        list[Callable[[RawConfigType], None]]
     ] = None,
 ) -> ConfigClass:
     """Retrieve the configuration settings.
@@ -128,7 +132,7 @@ def _version_validator(config: dict[str, Any]) -> None:
 
 def get_qualibrate_config(
     config_path: Path,
-    config: Optional[dict[str, Any]] = None,
+    config: Optional[RawConfigType] = None,
 ) -> QualibrateConfig:
     """Retrieve the Qualibrate configuration.
 

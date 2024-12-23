@@ -1,6 +1,5 @@
 from pathlib import Path
 from typing import (
-    Any,
     Optional,
     TypeVar,
 )
@@ -9,7 +8,8 @@ import click
 from pydantic import ValidationError
 
 from qualibrate_config.file import read_config_file
-from qualibrate_config.models import BaseConfig
+from qualibrate_config.models import BaseConfig, QualibrateConfig
+from qualibrate_config.qulibrate_types import RawConfigType
 
 T = TypeVar("T", bound=BaseConfig)
 
@@ -21,7 +21,7 @@ SUGGEST_MSG = (
 
 def get_config_solved_references_or_print_error(
     config_path: Path,
-) -> Optional[dict[str, Any]]:
+) -> Optional[RawConfigType]:
     try:
         return read_config_file(config_path, solve_references=True)
     except ValueError as ex:
@@ -31,7 +31,7 @@ def get_config_solved_references_or_print_error(
 
 
 def get_config_model_or_print_error(
-    config: dict[str, Any],
+    config: RawConfigType,
     model_type: type[T],
     config_key: Optional[str],
 ) -> Optional[T]:

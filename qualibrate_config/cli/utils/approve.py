@@ -6,6 +6,8 @@ from typing import Any
 
 import click
 
+from qualibrate_config.qulibrate_types import RawConfigType
+
 
 def print_config(data: Mapping[str, Any], depth: int = 0) -> None:
     if not len(data.keys()):
@@ -29,7 +31,7 @@ def print_config(data: Mapping[str, Any], depth: int = 0) -> None:
 
 def print_and_confirm(
     config_file: Path,
-    exported_data: dict[str, Any],
+    exported_data: RawConfigType,
     check_generator: bool,
 ) -> None:
     click.echo(f"Config file path: {config_file}")

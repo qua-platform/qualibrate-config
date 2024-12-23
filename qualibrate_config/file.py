@@ -1,7 +1,8 @@
 import sys
 from pathlib import Path
-from typing import Any, Optional, Union
+from typing import Optional, Union
 
+from qualibrate_config.qulibrate_types import RawConfigType
 from qualibrate_config.references.resolvers import resolve_references
 from qualibrate_config.vars import (
     DEFAULT_CONFIG_FILENAME,
@@ -53,9 +54,9 @@ def get_config_file(
 
 def read_config_file(
     config_file: Path, solve_references: bool = True
-) -> dict[str, Any]:
+) -> RawConfigType:
     with config_file.open("rb") as fin:
-        config: dict[str, Any] = tomllib.load(fin)  # typing for mypy tomli
+        config: RawConfigType = tomllib.load(fin)  # typing for mypy tomli
     if not solve_references:
         return config
     return resolve_references(config)
