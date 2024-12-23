@@ -19,6 +19,19 @@ SUGGEST_MSG = (
 )
 
 
+class InvalidQualibrateConfigVersion(RuntimeError):
+    pass
+
+
+def qualibrate_version_validator(config: RawConfigType) -> None:
+    version = config.get("qualibrate", {}).get("version")
+    if version is None or version != QualibrateConfig.version:
+        raise InvalidQualibrateConfigVersion(
+            "You have old version of config. "
+            "Please run `qualibrate-config migrate`."
+        )
+
+
 def get_config_solved_references_or_print_error(
     config_path: Path,
 ) -> Optional[RawConfigType]:

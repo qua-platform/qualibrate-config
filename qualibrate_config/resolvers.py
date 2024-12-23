@@ -12,7 +12,9 @@ from qualibrate_config.models import BaseConfig, QualibrateConfig
 from qualibrate_config.models.qualibrate import QualibrateTopLevelConfig
 from qualibrate_config.qulibrate_types import RawConfigType
 from qualibrate_config.validation import (
+    InvalidQualibrateConfigVersion,
     get_config_model_or_print_error,
+    qualibrate_version_validator,
 )
 from qualibrate_config.vars import (
     CONFIG_PATH_ENV_NAME,
@@ -121,18 +123,10 @@ def get_config_model(
     return new_config
 
 
-def _version_validator(config: dict[str, Any]) -> None:
-    version = config.get("qualibrate", {}).get("version")
-    if version is None or version != QualibrateConfig.version:
-        raise RuntimeError(
-            "You have old version of config. "
-            "Please run `qualibrate-config migrate`."
-        )
-
-
 def get_qualibrate_config(
     config_path: Path,
     config: Optional[RawConfigType] = None,
+    auto_migrate: bool = True,
 ) -> QualibrateConfig:
     """Retrieve the Qualibrate configuration.
 
@@ -140,6 +134,7 @@ def get_qualibrate_config(
         config_path: Path to the configuration file.
         config: Optional pre-loaded configuration data. If not provided, it
             will load and resolve references from the config file.
+        auto_migrate: is it needed to automatically apply migrations to config
 
     Returns:
         An instance of QualibrateConfig with the loaded configuration.
@@ -148,13 +143,23 @@ def get_qualibrate_config(
         RuntimeError: If the configuration file cannot be read or if the
             configuration state is invalid.
     """
-    model = get_config_model(
+    get_config_model_part = partial(
+        get_config_model,
         config_path,
         config_key=None,
         config_class=QualibrateTopLevelConfig,
         config=config,
-        raw_config_validators=[_version_validator],
     )
+    try:
+        model = get_config_model_part(
+            raw_config_validators=[qualibrate_version_validator]
+        )
+    except InvalidQualibrateConfigVersion:
+        if not auto_migrate:
+            raise
+        logging.info("Automatically migrate to new qualibrate config")
+        migrate_command(["--config-path", config_path], standalone_mode=False)
+        model = get_config_model_part()
     return model.qualibrate
 
 
