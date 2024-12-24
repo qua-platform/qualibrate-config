@@ -10,7 +10,7 @@ from qualibrate_config.vars import (
 )
 
 if sys.version_info[:2] < (3, 11):
-    import tomli as tomllib  # type: ignore
+    import tomli as tomllib  # type: ignore[unused-ignore,import-not-found]
 else:
     import tomllib
 
