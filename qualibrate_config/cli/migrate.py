@@ -3,7 +3,7 @@ from pathlib import Path
 import click
 import tomli_w
 
-from qualibrate_config.cli.config import get_config
+from qualibrate_config.cli.utils.content import get_config
 from qualibrate_config.cli.utils.migration_utils import make_migrations
 from qualibrate_config.models import QualibrateConfig
 from qualibrate_config.models.qualibrate import QualibrateTopLevelConfig

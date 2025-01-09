@@ -5,6 +5,7 @@ from pathlib import Path
 from typing import Any
 
 import click
+from click.exceptions import Exit
 
 from qualibrate_config.qulibrate_types import RawConfigType
 
@@ -38,7 +39,7 @@ def print_and_confirm(
     click.echo(click.style("Generated config:", bold=True))
     print_config(exported_data)
     if check_generator:
-        exit(0)
+        raise Exit(0)
     confirmed = click.confirm("Do you confirm config?", default=True)
     if not confirmed:
         click.echo(
@@ -50,4 +51,4 @@ def print_and_confirm(
                 fg="yellow",
             )
         )
-        exit(1)
+        raise Exit(1)

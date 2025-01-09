@@ -1,5 +1,6 @@
 from pathlib import Path
 from typing import (
+    Any,
     Optional,
     TypeVar,
 )
@@ -10,6 +11,7 @@ from pydantic import ValidationError
 from qualibrate_config.file import read_config_file
 from qualibrate_config.models import BaseConfig, QualibrateConfig
 from qualibrate_config.qulibrate_types import RawConfigType
+from qualibrate_config.vars import QUALIBRATE_CONFIG_KEY
 
 T = TypeVar("T", bound=BaseConfig)
 
@@ -19,12 +21,25 @@ SUGGEST_MSG = (
 )
 
 
+class WriteExitStatus(RuntimeError):
+    def __init__(self, *args: Any, exit_code: int) -> None:
+        super().__init__(*args)
+        self.exit_code = exit_code
+
+
 class InvalidQualibrateConfigVersion(RuntimeError):
     pass
 
 
-def qualibrate_version_validator(config: RawConfigType) -> None:
-    version = config.get("qualibrate", {}).get("version")
+def qualibrate_version_validator(
+    config: RawConfigType,
+    skip_if_none: bool = True,
+) -> None:
+    if not skip_if_none and QUALIBRATE_CONFIG_KEY not in config:
+        raise InvalidQualibrateConfigVersion(
+            "Qualibrate config has no 'qualibrate' key"
+        )
+    version = config[QUALIBRATE_CONFIG_KEY].get("version")
     if version is None or version != QualibrateConfig.version:
         raise InvalidQualibrateConfigVersion(
             "You have old version of config. "
