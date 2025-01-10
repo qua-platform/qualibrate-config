@@ -5,6 +5,10 @@ from typing import Optional
 import click
 from click.exceptions import Exit
 
+from qualibrate_config.cli.deprecated import (
+    DeprecatedOption,
+    DeprecatedOptionsCommand,
+)
 from qualibrate_config.cli.migrate import migrate_command
 from qualibrate_config.cli.utils.content import (
     get_config,
@@ -31,7 +35,7 @@ from qualibrate_config.vars import (
 __all__ = ["config_command"]
 
 
-@click.command(name="config")
+@click.command(name="config", cls=DeprecatedOptionsCommand)
 @click.option(
     "--config-path",
     type=click.Path(
@@ -77,9 +81,13 @@ __all__ = ["config_command"]
     show_default=True,
 )
 @click.option(
+    "--password",
     "--qualibrate-password",
     type=str,
     default=None,
+    cls=DeprecatedOption,
+    deprecated=("--qualibrate-password",),
+    preferred="--password",
     help=(
         "Password used to authorize users. By default, no password is used. "
         "Everyone has access to the API. If a password is specified during "
@@ -181,7 +189,7 @@ def config_command(
     auto_accept: bool,
     project: str,
     log_folder: Path,
-    qualibrate_password: Optional[str],
+    password: Optional[str],
     storage_type: StorageType,
     storage_location: Path,
     calibration_library_resolver: str,
