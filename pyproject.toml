@@ -1,0 +1,73 @@
+[tool.poetry]
+name = "qualibrate-config"
+version = "0.1.0"
+description = ""
+license = "BSD-3-Clause"
+authors = ["Quantum Machines <info@quantum-machines.co>"]
+packages = [{ include = "qualibrate_config" }]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.9"
+pydantic = "^2.9.2"
+jsonpatch = "^1.33"
+tomli = { version = "^2.0.1", python = "<3.11" }
+tomli-w = "^1.0.0"
+pydantic-settings = "^2.6.1"
+click = "^8.1.7"
+
+[tool.poetry.group.dev.dependencies]
+mypy = "^1.13.0"
+ruff = "^0.8.1"
+poethepoet = "^0.31.1"
+
+[tool.poetry.group.test.dependencies]
+pytest = "^8.3.3"
+pytest-mock = "^3.14.0"
+
+[tool.poetry.scripts]
+qualibrate-config = "qualibrate_config.__main__:main"
+
+[tool.mypy]
+python_version = "3.9"
+strict = true
+warn_return_any = true
+exclude = ['tests/']
+
+[[tool.mypy.overrides]]
+module = ["jsonpatch", "jsonpointer"]
+ignore_missing_imports = true
+
+[tool.ruff]
+line-length = 80
+target-version = "py39"
+
+[tool.ruff.lint]
+select = [
+    "E",    # pycodestyle
+    "F",    # Pyflakes
+    "UP",   # pyupgrade
+    "B",    # flake8-bugbear
+    "SIM",  # flake8-simplify
+    "I",    # isort
+]
+
+[tool.ruff.lint.pycodestyle]
+max-line-length = 80
+max-doc-length = 80
+
+
+[tool.poe.tasks]
+lint = "ruff check ."
+lint-fix = "ruff check --fix ."
+format = "ruff format --check ."
+format-fix = "ruff format ."
+type = "mypy ."
+check.sequence = ["lint", "format", "type"]
+fix.sequence = ["lint-fix", "format-fix", "type"]
+fix.ignore_fail = "return_non_zero"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
