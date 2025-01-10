@@ -46,9 +46,7 @@ class Migrate(MigrateBase):
             "qualibrate_composite", None
         )
         q_runner: Optional[RawConfigType] = data.pop("qualibrate_runner", None)
-        active_machine: Optional[RawConfigType] = data.pop(
-            "active_machine", None
-        )
+        active_machine: Optional[RawConfigType] = data.get("active_machine")
         if active_machine is not None and "path" in active_machine:
             data["quam"] = {"state_path": active_machine["path"]}
 
