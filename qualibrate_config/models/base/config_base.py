@@ -1,5 +1,6 @@
 import importlib
 from enum import Enum
+from itertools import filterfalse
 from pathlib import Path
 from typing import (
     Any,
@@ -57,6 +58,8 @@ class BaseConfig:
 
             value = self._parse_value(key, value, value_type)
             self._set_config_attr(key, value)
+        for key in filterfalse(self._annotations.__contains__, config):
+            self._raw_dict[key] = config[key]
 
     def _set_config_attr(self, key: str, value: Any) -> None:
         raw_value = value._raw_dict if isinstance(value, BaseConfig) else value
