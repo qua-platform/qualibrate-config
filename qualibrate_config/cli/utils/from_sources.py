@@ -5,6 +5,13 @@ from click.core import ParameterSource
 
 from qualibrate_config.qulibrate_types import RawConfigType
 
+__all__ = [
+    "not_default",
+    "get_config_by_args_mapping",
+    "get_optional_config",
+    "qualibrate_config_from_sources",
+]
+
 
 def not_default(ctx: click.Context, arg_key: str) -> bool:
     return ctx.get_parameter_source(arg_key) in (
@@ -13,7 +20,7 @@ def not_default(ctx: click.Context, arg_key: str) -> bool:
     )
 
 
-def _get_config(
+def get_config_by_args_mapping(
     args_mapping: dict[str, str],
     from_file: RawConfigType,
     ctx: click.Context,
@@ -28,12 +35,12 @@ def _get_config(
     return from_file
 
 
-def _get_optional_config(
+def get_optional_config(
     args_mapping: dict[str, str],
     from_file: Optional[RawConfigType],
     ctx: click.Context,
 ) -> Optional[RawConfigType]:
-    return _get_config(args_mapping, from_file or {}, ctx)
+    return get_config_by_args_mapping(args_mapping, from_file or {}, ctx)
 
 
 def _get_storage_config(
@@ -43,7 +50,7 @@ def _get_storage_config(
         "storage_type": "type",
         "storage_location": "location",
     }
-    return _get_config(storage_keys, from_file, ctx)
+    return get_config_by_args_mapping(storage_keys, from_file, ctx)
 
 
 def _get_calibration_library_config(
@@ -53,7 +60,7 @@ def _get_calibration_library_config(
         "calibration_library_resolver": "resolver",
         "calibration_library_folder": "folder",
     }
-    from_file = _get_optional_config(args_mapping, from_file, ctx)
+    from_file = get_optional_config(args_mapping, from_file, ctx)
     return from_file
 
 
@@ -62,25 +69,25 @@ def _get_app_config(
 ) -> Optional[RawConfigType]:
     args_mapping = {"app_static_site_files": "static_site_files"}
     # TODO: JsonTimelineDB
-    return _get_optional_config(args_mapping, from_file, ctx)
+    return get_optional_config(args_mapping, from_file, ctx)
 
 
 def _get_runner_config(
     ctx: click.Context, from_file: RawConfigType
 ) -> Optional[RawConfigType]:
     args_mapping = {"runner_address": "address", "runner_timeout": "timeout"}
-    return _get_optional_config(args_mapping, from_file, ctx)
+    return get_optional_config(args_mapping, from_file, ctx)
 
 
 def _get_composite_config(
     ctx: click.Context, from_file: Optional[RawConfigType]
 ) -> Optional[RawConfigType]:
-    app = _get_optional_config(
+    app = get_optional_config(
         {"spawn_app": "spawn"},
         from_file.get("app") if from_file is not None else None,
         ctx,
     )
-    runner = _get_optional_config(
+    runner = get_optional_config(
         {"spawn_runner": "spawn"},
         from_file.get("runner") if from_file is not None else None,
         ctx,
@@ -93,7 +100,7 @@ def _get_composite_config(
     }
 
 
-def config_from_sources(
+def qualibrate_config_from_sources(
     ctx: click.Context,
     from_file: RawConfigType,
     required_subconfigs: tuple[str, ...],
@@ -121,7 +128,7 @@ def config_from_sources(
         "project": "project",
         "log_folder": "log_folder",
     }
-    qualibrate_common = _get_config(
+    qualibrate_common = get_config_by_args_mapping(
         qualibrate_common_mapping,
         from_file,
         ctx,

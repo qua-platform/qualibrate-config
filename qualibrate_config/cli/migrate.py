@@ -3,7 +3,7 @@ from pathlib import Path
 import click
 import tomli_w
 
-from qualibrate_config.cli.utils.content import get_config
+from qualibrate_config.cli.utils.content import get_config_file_content
 from qualibrate_config.cli.utils.migration_utils import make_migrations
 from qualibrate_config.models import QualibrateConfig
 from qualibrate_config.models.qualibrate import QualibrateTopLevelConfig
@@ -38,7 +38,7 @@ __all__ = ["migrate_command"]
 def migrate_command(
     ctx: click.Context, config_path: Path, to_version: int
 ) -> None:
-    common_config, config_file = get_config(config_path)
+    common_config, config_file = get_config_file_content(config_path)
     if common_config == {}:
         click.secho("Config file wasn't found. Nothing to migrate", fg="yellow")
         return
