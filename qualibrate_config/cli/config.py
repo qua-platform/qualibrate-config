@@ -192,6 +192,16 @@ __all__ = ["config_command"]
     show_default=True,
     help="Path to the frontend build static files.",
 )
+@click.option(
+    "--quam-state-path",
+    "--active-machine-path",
+    type=click.Path(file_okay=False, dir_okay=True, path_type=Path),
+    cls=DeprecatedOption,
+    required=False,
+    deprecated=("--active-machine-path",),
+    preferred="--quam-state-path",
+    help="Path to the quam state.",
+)
 @click.option("--check-generator", is_flag=True, hidden=True)
 @click.pass_context
 def config_command(
@@ -210,6 +220,7 @@ def config_command(
     runner_timeout: float,
     spawn_app: bool,
     app_static_site_files: Path,
+    quam_state_path: Optional[Path],
     check_generator: bool,
 ) -> None:
     common_config, config_file = get_config_file_content(config_path)
@@ -234,6 +245,7 @@ def config_command(
     qs = QualibrateTopLevelConfig({QUALIBRATE_CONFIG_KEY: qualibrate_config})
     qs.qualibrate.storage.location.mkdir(parents=True, exist_ok=True)
     try:
+        _temporary_fill_quam_state_path(common_config, quam_state_path)
         write_config(
             config_file,
             common_config,
@@ -246,6 +258,21 @@ def config_command(
         if old_config:
             simple_write(config_file, old_config)
         raise
+
+
+def _temporary_fill_quam_state_path(
+    common_config: RawConfigType, state_path: Optional[Path]
+) -> RawConfigType:
+    quam = common_config.get("quam", {})
+    active_machine = common_config.get("active_machine", {})
+    new_state_path = (
+        state_path or quam.get("state_path") or active_machine.get("path")
+    )
+    if new_state_path is None:
+        return common_config
+    quam["state_path"] = str(new_state_path)
+    common_config.update({"quam": quam})
+    return common_config
 
 
 if __name__ == "__main__":
