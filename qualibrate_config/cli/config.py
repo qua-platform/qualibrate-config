@@ -11,7 +11,7 @@ from qualibrate_config.cli.deprecated import (
 )
 from qualibrate_config.cli.migrate import migrate_command
 from qualibrate_config.cli.utils.content import (
-    get_config,
+    get_config_file_content,
     simple_write,
     write_config,
 )
@@ -19,7 +19,9 @@ from qualibrate_config.cli.utils.defaults import (
     get_qapp_static_file_path,
     get_user_storage,
 )
-from qualibrate_config.cli.utils.from_sources import config_from_sources
+from qualibrate_config.cli.utils.from_sources import (
+    qualibrate_config_from_sources,
+)
 from qualibrate_config.models.qualibrate import QualibrateTopLevelConfig
 from qualibrate_config.models.storage_type import StorageType
 from qualibrate_config.validation import (
@@ -201,7 +203,7 @@ def config_command(
     app_static_site_files: Path,
     check_generator: bool,
 ) -> None:
-    common_config, config_file = get_config(config_path)
+    common_config, config_file = get_config_file_content(config_path)
     old_config = deepcopy(common_config)
     try:
         qualibrate_version_validator(common_config, False)
@@ -210,11 +212,11 @@ def config_command(
             migrate_command(
                 ["--config-path", config_path], standalone_mode=False
             )
-            common_config, config_file = get_config(config_path)
+            common_config, config_file = get_config_file_content(config_path)
     qualibrate_config = common_config.get(QUALIBRATE_CONFIG_KEY, {})
     required_subconfigs = ("storage",)
     optional_subconfigs = ("app", "runner", "composite", "calibration_library")
-    qualibrate_config = config_from_sources(
+    qualibrate_config = qualibrate_config_from_sources(
         ctx,
         qualibrate_config,
         required_subconfigs,
@@ -227,6 +229,7 @@ def config_command(
             config_file,
             common_config,
             qs.qualibrate,
+            QUALIBRATE_CONFIG_KEY,
             confirm=not auto_accept,
             check_generator=check_generator,
         )
