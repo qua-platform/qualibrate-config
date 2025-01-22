@@ -24,6 +24,7 @@ from qualibrate_config.cli.utils.from_sources import (
 )
 from qualibrate_config.models.qualibrate import QualibrateTopLevelConfig
 from qualibrate_config.models.storage_type import StorageType
+from qualibrate_config.qulibrate_types import RawConfigType
 from qualibrate_config.validation import (
     InvalidQualibrateConfigVersion,
     qualibrate_version_validator,
@@ -109,7 +110,7 @@ __all__ = ["config_command"]
 )
 @click.option(
     "--storage-location",
-    type=click.Path(file_okay=False, dir_okay=True),
+    type=click.Path(file_okay=False, dir_okay=True, path_type=Path),
     default=get_user_storage(),
     show_default=True,
     help=(
@@ -118,9 +119,13 @@ __all__ = ["config_command"]
 )
 @click.option(
     "--calibration-library-resolver",
+    "--runner-calibration-library-resolver",
     type=str,
     default="qualibrate.QualibrationLibrary",
     show_default=True,
+    cls=DeprecatedOption,
+    deprecated=("--runner-calibration-library-resolver",),
+    preferred="--calibration-library-resolver",
     help=(
         "String contains python path to the class that represents qualibration "
         "library."
@@ -128,9 +133,13 @@ __all__ = ["config_command"]
 )
 @click.option(
     "--calibration-library-folder",
-    type=click.Path(file_okay=False, dir_okay=True),
+    "--runner-calibration-library-resolver",
+    type=click.Path(file_okay=False, dir_okay=True, path_type=Path),
     default=QUALIBRATE_PATH / "calibrations",
     show_default=True,
+    cls=DeprecatedOption,
+    deprecated=("--runner-calibration-library-resolver",),
+    preferred="--calibration-library-folder",
     help="Path to the folder contains calibration nodes and graphs.",
 )
 @click.option(
@@ -178,7 +187,7 @@ __all__ = ["config_command"]
 )
 @click.option(
     "--app-static-site-files",
-    type=click.Path(file_okay=False, dir_okay=True),
+    type=click.Path(file_okay=False, dir_okay=True, path_type=Path),
     default=get_qapp_static_file_path(),
     show_default=True,
     help="Path to the frontend build static files.",
