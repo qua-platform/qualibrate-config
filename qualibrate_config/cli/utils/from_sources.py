@@ -116,7 +116,7 @@ def config_from_sources(
     }
     storage_config = _get_storage_config(ctx, from_file["storage"])
     qualibrate_common_mapping = {
-        "qualibrate_password": "password",
+        "password": "password",
         "version": "version",
         "project": "project",
         "log_folder": "log_folder",
