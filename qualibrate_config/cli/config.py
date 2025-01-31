@@ -17,7 +17,6 @@ from qualibrate_config.cli.utils.content import (
 )
 from qualibrate_config.cli.utils.defaults import (
     get_qapp_static_file_path,
-    get_qua_dashboards_spawn,
     get_user_storage,
 )
 from qualibrate_config.cli.utils.from_sources import (
@@ -196,7 +195,7 @@ __all__ = ["config_command"]
 @click.option(
     "--spawn-qua-dashboards",
     type=bool,
-    default=get_qua_dashboards_spawn(),
+    default=True,
     show_default=True,
     help=(
         "This flag indicates whether the `qua-dashboards` service should be "

@@ -1,7 +1,6 @@
 from typing import Optional
 
 from qualibrate_config.cli.migrations.base import MigrateBase
-from qualibrate_config.cli.utils.defaults import get_qua_dashboards_spawn
 from qualibrate_config.qulibrate_types import RawConfigType
 
 
@@ -30,9 +29,7 @@ class Migrate(MigrateBase):
         version = new_qualibrate.pop("version")
         assert version == Migrate.from_version
         if composite := new_qualibrate.get("composite", None):
-            composite.update(
-                {"qua_dashboards": {"spawn": get_qua_dashboards_spawn()}}
-            )
+            composite.update({"qua_dashboards": {"spawn": True}})
         new_qualibrate["version"] = Migrate.to_version
         new_data = {"qualibrate": new_qualibrate, **data}
         return new_data

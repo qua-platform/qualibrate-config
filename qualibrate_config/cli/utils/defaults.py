@@ -17,7 +17,3 @@ def get_user_storage() -> Path:
     return QUALIBRATE_PATH.joinpath(
         "user_storage", f"${{#/{QUALIBRATE_CONFIG_KEY}/project}}"
     )
-
-
-def get_qua_dashboards_spawn() -> bool:
-    return find_spec("qua_dashboards") is not None
