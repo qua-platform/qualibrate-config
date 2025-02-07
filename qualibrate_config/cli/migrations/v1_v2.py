@@ -12,7 +12,7 @@ class Migrate(MigrateBase):
     def backward(data: RawConfigType) -> RawConfigType:
         qualibrate = data.pop("qualibrate")
         quam: Optional[RawConfigType] = data.pop("quam", None)
-        qualibrate.pop("version")
+        assert qualibrate.pop("version") == Migrate.to_version
         qualibrate["config_version"] = 1
 
         app = qualibrate.pop("app", None)

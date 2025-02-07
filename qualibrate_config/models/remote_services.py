@@ -9,6 +9,7 @@ __all__ = [
     "QualibrateRunnerRemoteServiceConfig",
     "QualibrateAppSubServiceConfig",
     "QualibrateRunnerSubServiceConfig",
+    "QuaDashboardSubServiceConfig",
 ]
 
 
@@ -39,4 +40,8 @@ class QualibrateAppSubServiceConfig(SpawnServiceBaseConfig):
 
 
 class QualibrateRunnerSubServiceConfig(SpawnServiceBaseConfig):
+    pass
+
+
+class QuaDashboardSubServiceConfig(SpawnServiceBaseConfig):
     pass

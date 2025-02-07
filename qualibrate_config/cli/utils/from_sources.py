@@ -92,11 +92,17 @@ def _get_composite_config(
         from_file.get("runner") if from_file is not None else None,
         ctx,
     )
-    if app is None and runner is None:
+    qua_dashboards = get_optional_config(
+        {"spawn_qua_dashboards": "spawn"},
+        from_file.get("qua_dashboards") if from_file is not None else None,
+        ctx,
+    )
+    if all(s is None for s in (app, runner, qua_dashboards)):
         return None
     return {
         "app": (app or {"spawn": False}),
         "runner": (runner or {"spawn": False}),
+        "qua_dashboards": (qua_dashboards or {"spawn": False}),
     }
 
 

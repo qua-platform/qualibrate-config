@@ -193,6 +193,16 @@ __all__ = ["config_command"]
     help="Path to the frontend build static files.",
 )
 @click.option(
+    "--spawn-qua-dashboards",
+    type=bool,
+    default=True,
+    show_default=True,
+    help=(
+        "This flag indicates whether the `qua-dashboards` service should be "
+        "started."
+    ),
+)
+@click.option(
     "--quam-state-path",
     "--active-machine-path",
     type=click.Path(file_okay=False, dir_okay=True, path_type=Path),
@@ -220,6 +230,7 @@ def config_command(
     runner_timeout: float,
     spawn_app: bool,
     app_static_site_files: Path,
+    spawn_qua_dashboards: bool,
     quam_state_path: Optional[Path],
     check_generator: bool,
 ) -> None:

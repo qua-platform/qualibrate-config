@@ -5,6 +5,7 @@ from .q_app import QualibrateAppConfig
 from .qualibrate import QualibrateConfig
 from .remote_services import (
     JsonTimelineDBRemoteServiceConfig,
+    QuaDashboardSubServiceConfig,
     QualibrateAppSubServiceConfig,
     QualibrateRunnerRemoteServiceConfig,
     QualibrateRunnerSubServiceConfig,
@@ -25,6 +26,7 @@ __all__ = [
     "JsonTimelineDBRemoteServiceConfig",
     "RemoteServiceBaseConfig",
     "SpawnServiceBaseConfig",
+    "QuaDashboardSubServiceConfig",
     "QualibrateAppSubServiceConfig",
     "QualibrateRunnerSubServiceConfig",
     "QualibrateRunnerRemoteServiceConfig",
