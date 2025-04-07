@@ -124,14 +124,15 @@ def get_config_model(
 
 
 def get_qualibrate_config(
-    config_path: Path,
+    config_path: Optional[Path] = None,
     config: Optional[RawConfigType] = None,
     auto_migrate: bool = True,
 ) -> QualibrateConfig:
     """Retrieve the Qualibrate configuration.
 
     Args:
-        config_path: Path to the configuration file.
+        config_path: Optional pre-loaded configuration data. If not provided, it
+            will load and resolve references from the config file.
         config: Optional pre-loaded configuration data. If not provided, it
             will load and resolve references from the config file.
         auto_migrate: is it needed to automatically apply migrations to config
@@ -143,6 +144,9 @@ def get_qualibrate_config(
         RuntimeError: If the configuration file cannot be read or if the
             configuration state is invalid.
     """
+    if config_path is None:
+        config_path = get_qualibrate_config_path()
+
     get_config_model_part = partial(
         get_config_model,
         config_path,
