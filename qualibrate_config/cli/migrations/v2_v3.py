@@ -14,7 +14,7 @@ class Migrate(MigrateBase):
         assert qualibrate.pop("version") == Migrate.to_version
         qualibrate["version"] = Migrate.from_version
 
-        composite: Optional[RawConfigType] = qualibrate.pop("composite", None)
+        composite: Optional[RawConfigType] = qualibrate.get("composite", None)
         if composite:
             composite.pop("qua_dashboards", None)
 
