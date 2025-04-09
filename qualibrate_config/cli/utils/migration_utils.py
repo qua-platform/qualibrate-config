@@ -1,6 +1,7 @@
 import importlib
 from typing import Callable
 
+from qualibrate_config.cli.migrations.base import MigrateBase
 from qualibrate_config.qulibrate_types import RawConfigType
 
 
@@ -24,7 +25,15 @@ def migration_functions(
             (version, other_version) if direction else (other_version, version)
         )
         module_name = module_name_format.format(minmax[0], minmax[1])
-        module = importlib.import_module(f"{migrations_package}.{module_name}")
+        full_module_name = f"{migrations_package}.{module_name}"
+        module = importlib.import_module(full_module_name)
+        if not hasattr(module, "Migrate") or not issubclass(
+            module.Migrate, MigrateBase
+        ):
+            raise AttributeError(
+                f"Module {full_module_name} has no Migrate class or it "
+                f"has invalid hierarchy"
+            )
         function = (
             module.Migrate.forward if direction else module.Migrate.backward
         )
