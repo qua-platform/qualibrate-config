@@ -10,6 +10,6 @@ __all__ = ["QualibrateAppConfig"]
 
 
 class QualibrateAppConfig(BaseConfig):
-    static_site_files: Path
+    static_site_files: Optional[Path] = None
 
     timeline_db: Optional[JsonTimelineDBRemoteServiceConfig] = None
