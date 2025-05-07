@@ -25,7 +25,9 @@ class Migrate(MigrateBase):
         if app_module is None or app_module.origin is None:
             return {"qualibrate": qualibrate, **data}
         module_path = Path(app_module.origin)
-        app["static_site_files"] = module_path.parents[1] / "qualibrate_static"
+        app["static_site_files"] = str(
+            module_path.parents[1] / "qualibrate_static"
+        )
         return {"qualibrate": qualibrate, **data}
 
     @staticmethod
@@ -42,6 +44,6 @@ class Migrate(MigrateBase):
         if static_files is None:
             return {"qualibrate": new_qualibrate, **data}
         path = Path(static_files)
-        if tuple(path.parts[-2:]) == ("site_packages", "qualibrate_static"):
+        if tuple(path.parts[-2:]) == ("site-packages", "qualibrate_static"):
             app.pop("static_site_files", None)
         return {"qualibrate": new_qualibrate, **data}
