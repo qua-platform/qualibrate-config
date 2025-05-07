@@ -3,6 +3,7 @@ from enum import Enum
 from itertools import filterfalse
 from pathlib import Path
 from typing import (
+    Annotated,
     Any,
     Callable,
     ClassVar,
@@ -15,6 +16,7 @@ from typing import (
 
 from pydantic_core._pydantic_core import ValidationError
 
+from qualibrate_config.models.base.default_value import DefaultConfigValue
 from qualibrate_config.models.base.importable import Importable
 from qualibrate_config.models.base.path_serializer import PathSerializer
 from qualibrate_config.qulibrate_types import RawConfigType
@@ -46,11 +48,16 @@ class BaseConfig:
         """
         self._path = path or "/"
         self._data: RawConfigType = {}
-        self._annotations = self.get_annotations()
+        self._annotations = self.get_config_annotations()
         self._raw_dict: RawConfigType = {}
         self.__class__._root = root or self
 
-        for key, value_type in self._annotations.items():
+        for key, value_type_default in self._annotations.items():
+            value_type = (
+                value_type_default[0]
+                if isinstance(value_type_default, tuple)
+                else value_type_default
+            )
             # Default value from class or set to None
             default_value = getattr(self.__class__, key, None)
             # Get value from config or use default
@@ -185,7 +192,9 @@ class BaseConfig:
         return value
 
     @classmethod
-    def get_annotations(cls) -> dict[str, type]:
+    def get_config_annotations(
+        cls,
+    ) -> dict[str, tuple[type, DefaultConfigValue]]:
         """
         Collect annotations from the current class and its ancestors.
         Handles inheritance correctly.
@@ -193,7 +202,24 @@ class BaseConfig:
         annotations = {}
         for parent in reversed(cls.__mro__):
             if issubclass(parent, BaseConfig):
-                annotations.update(get_type_hints(parent))
+                type_hints = get_type_hints(parent)
+                class_annotations = parent.__annotations__
+                for attr, annot in class_annotations.items():
+                    if attr not in type_hints:
+                        raise AttributeError("Unkown attribute")
+                    if get_origin(annot) is not Annotated:
+                        type_hints[attr] = (type_hints[attr], None)
+                        continue
+                    args = get_args(annot)
+                    annot_default = next(
+                        filter(
+                            lambda a: isinstance(a, DefaultConfigValue), args
+                        ),
+                        None,
+                    )
+                    if annot_default is not None:
+                        type_hints[attr] = (type_hints[attr], annot_default)
+                annotations.update(type_hints)
         annotations.pop("_root", None)
         return annotations
 
@@ -242,7 +268,14 @@ class BaseConfig:
                     raise ValueError("Root shouldn't be None")
                 raw_dict = self._get_root()._raw_dict
                 return resolve_single_item(raw_dict, value)
-            annotation = annotations[name]
+            annotation_with_default = annotations[name]
+            default: Optional[DefaultConfigValue] = None
+            if isinstance(annotation_with_default, tuple):
+                annotation, default = annotation_with_default
+            else:
+                annotation = annotation_with_default
+            if value is None and isinstance(default, DefaultConfigValue):
+                value = default.value
             annotation_type = get_origin(annotation) or annotation
             if not isinstance(annotation_type, type):
                 return value
@@ -273,7 +306,8 @@ class BaseConfig:
         if name not in self._annotations:
             super().__setattr__(name, value)
             return
-        expected_type = self._annotations[name]
+        annot = self._annotations[name]
+        expected_type = annot[0] if isinstance(annot, tuple) else annot
         value = self._parse_value(name, value, expected_type)
         self._set_config_attr(name, value)
 
