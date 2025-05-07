@@ -15,10 +15,7 @@ from qualibrate_config.cli.utils.content import (
     simple_write,
     write_config,
 )
-from qualibrate_config.cli.utils.defaults import (
-    get_qapp_static_file_path,
-    get_user_storage,
-)
+from qualibrate_config.cli.utils.defaults import get_user_storage
 from qualibrate_config.cli.utils.from_sources import (
     qualibrate_config_from_sources,
 )
@@ -188,8 +185,6 @@ __all__ = ["config_command"]
 @click.option(
     "--app-static-site-files",
     type=click.Path(file_okay=False, dir_okay=True, path_type=Path),
-    default=get_qapp_static_file_path(),
-    show_default=True,
     help="Path to the frontend build static files.",
 )
 @click.option(
