@@ -27,7 +27,37 @@ class WriteExitStatus(RuntimeError):
         self.exit_code = exit_code
 
 
-class InvalidQualibrateConfigVersion(RuntimeError):
+class InvalidQualibrateConfigVersionError(RuntimeError):
+    def __init__(
+        self,
+        *args: Any,
+        passed: Any = None,
+        supported: int,
+        **kwargs: Any,
+    ) -> None:
+        super().__init__(*args, **kwargs)
+        self._passed_version = passed
+        self._supported_version = supported
+
+    def __str__(self) -> str:
+        return (
+            f"{super().__str__()} "
+            f"Passed version: {self._passed_version}. "
+            f"Supported version: {self._supported_version}"
+        )
+
+    @property
+    def passed_version(self) -> Any:
+        return self._passed_version
+
+    @property
+    def supported_version(self) -> int:
+        return self._supported_version
+
+
+class GreaterThanSupportedQualibrateConfigVersionError(
+    InvalidQualibrateConfigVersionError
+):
     pass
 
 
@@ -35,16 +65,52 @@ def qualibrate_version_validator(
     config: RawConfigType,
     skip_if_none: bool = True,
 ) -> None:
-    if not skip_if_none and QUALIBRATE_CONFIG_KEY not in config:
-        raise InvalidQualibrateConfigVersion(
-            "Qualibrate config has no 'qualibrate' key"
+    if QUALIBRATE_CONFIG_KEY not in config:
+        if skip_if_none:
+            return
+        raise InvalidQualibrateConfigVersionError(
+            "Qualibrate config has no 'qualibrate' key",
+            supported=QualibrateConfig.version,
         )
     version = config[QUALIBRATE_CONFIG_KEY].get("version")
-    if version is None or version != QualibrateConfig.version:
-        raise InvalidQualibrateConfigVersion(
-            "You have old version of config. "
-            "Please run `qualibrate-config migrate`."
+    error_msg = (
+        "QUAlibrate was unable to load the config. Can't parse version "
+        "of qualibrate config. Please run `qualibrate-config config`."
+    )
+    if version is None:
+        if skip_if_none:
+            return
+        raise InvalidQualibrateConfigVersionError(
+            error_msg,
+            passed=version,
+            supported=QualibrateConfig.version,
         )
+    if not isinstance(version, int):
+        raise InvalidQualibrateConfigVersionError(
+            error_msg,
+            passed=version,
+            supported=QualibrateConfig.version,
+        )
+    if version == QualibrateConfig.version:
+        return
+    if version < QualibrateConfig.version:
+        raise InvalidQualibrateConfigVersionError(
+            (
+                "You have old version of config. "
+                "Please run `qualibrate-config migrate`."
+            ),
+            passed=version,
+            supported=QualibrateConfig.version,
+        )
+    raise GreaterThanSupportedQualibrateConfigVersionError(
+        (
+            "You have config version greater than supported. "
+            "Please update your qualibrate-config package "
+            "(pip install --upgrade qualibrate-config)."
+        ),
+        passed=version,
+        supported=QualibrateConfig.version,
+    )
 
 
 def get_config_solved_references_or_print_error(
