@@ -27,7 +27,11 @@ class WriteExitStatus(RuntimeError):
         self.exit_code = exit_code
 
 
-class InvalidQualibrateConfigVersionError(RuntimeError):
+class InvalidQualibrateConfigVersion(RuntimeError):
+    pass
+
+
+class InvalidQualibrateConfigVersionError(InvalidQualibrateConfigVersion):
     def __init__(
         self,
         *args: Any,
