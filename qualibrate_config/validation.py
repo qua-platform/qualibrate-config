@@ -46,6 +46,14 @@ class InvalidQualibrateConfigVersionError(RuntimeError):
             f"Supported version: {self._supported_version}"
         )
 
+    @property
+    def passed_version(self) -> Any:
+        return self._passed_version
+
+    @property
+    def supported_version(self) -> int:
+        return self._supported_version
+
 
 class GreaterThanSupportedQualibrateConfigVersionError(
     InvalidQualibrateConfigVersionError
@@ -57,18 +65,29 @@ def qualibrate_version_validator(
     config: RawConfigType,
     skip_if_none: bool = True,
 ) -> None:
-    if not skip_if_none and QUALIBRATE_CONFIG_KEY not in config:
+    if QUALIBRATE_CONFIG_KEY not in config:
+        if skip_if_none:
+            return
         raise InvalidQualibrateConfigVersionError(
             "Qualibrate config has no 'qualibrate' key",
             supported=QualibrateConfig.version,
         )
     version = config[QUALIBRATE_CONFIG_KEY].get("version")
-    if version is None or not isinstance(version, int):
+    error_msg = (
+        "QUAlibrate was unable to load the config. Can't parse version "
+        "of qualibrate config. Please run `qualibrate-config config`."
+    )
+    if version is None:
+        if skip_if_none:
+            return
         raise InvalidQualibrateConfigVersionError(
-            (
-                "QUAlibrate was unable to load the config. Can't parse version "
-                "of qualibrate config. Please run `qualibrate-config config`."
-            ),
+            error_msg,
+            passed=version,
+            supported=QualibrateConfig.version,
+        )
+    if not isinstance(version, int):
+        raise InvalidQualibrateConfigVersionError(
+            error_msg,
             passed=version,
             supported=QualibrateConfig.version,
         )
