@@ -23,7 +23,8 @@ from qualibrate_config.models.qualibrate import QualibrateTopLevelConfig
 from qualibrate_config.models.storage_type import StorageType
 from qualibrate_config.qulibrate_types import RawConfigType
 from qualibrate_config.validation import (
-    InvalidQualibrateConfigVersion,
+    GreaterThanSupportedQualibrateConfigVersionError,
+    InvalidQualibrateConfigVersionError,
     qualibrate_version_validator,
 )
 from qualibrate_config.vars import (
@@ -233,7 +234,14 @@ def config_command(
     old_config = deepcopy(common_config)
     try:
         qualibrate_version_validator(common_config, False)
-    except InvalidQualibrateConfigVersion:
+    except GreaterThanSupportedQualibrateConfigVersionError as ex:
+        error_msg = (
+            f"QUAlibrate was unable to load the config. {str(ex)}. If this "
+            f'problem persists, please delete "{config_path}" and retry '
+            'running "qualibrate config"'
+        )
+        raise RuntimeError(error_msg) from ex
+    except InvalidQualibrateConfigVersionError:
         if common_config:
             migrate_command(
                 ["--config-path", config_path], standalone_mode=False

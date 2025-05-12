@@ -12,7 +12,8 @@ from qualibrate_config.models import BaseConfig, QualibrateConfig
 from qualibrate_config.models.qualibrate import QualibrateTopLevelConfig
 from qualibrate_config.qulibrate_types import RawConfigType
 from qualibrate_config.validation import (
-    InvalidQualibrateConfigVersion,
+    GreaterThanSupportedQualibrateConfigVersionError,
+    InvalidQualibrateConfigVersionError,
     get_config_model_or_print_error,
     qualibrate_version_validator,
 )
@@ -154,7 +155,7 @@ def get_qualibrate_config(
         config_class=QualibrateTopLevelConfig,
         config=config,
     )
-    error_msg = (
+    common_error_msg = (
         "QUAlibrate was unable to load the config. It is recommend to run "
         '"qualibrate config" to fix any file issues. If this problem persists, '
         f'please delete "{config_path}" and retry running '
@@ -164,20 +165,27 @@ def get_qualibrate_config(
         model = get_config_model_part(
             raw_config_validators=[qualibrate_version_validator]
         )
-    except InvalidQualibrateConfigVersion:
+    except GreaterThanSupportedQualibrateConfigVersionError as ex:
+        error_msg = (
+            f"QUAlibrate was unable to load the config. {str(ex)}. If this "
+            f'problem persists, please delete "{config_path}" and retry '
+            'running "qualibrate config"'
+        )
+        raise RuntimeError(error_msg) from ex
+    except InvalidQualibrateConfigVersionError:
         if not auto_migrate:
             raise
         logging.info("Automatically migrate to new qualibrate config")
         migrate_command(["--config-path", config_path], standalone_mode=False)
     except (RuntimeError, ValueError) as ex:
-        raise RuntimeError(error_msg) from ex
+        raise RuntimeError(common_error_msg) from ex
     else:
         return model.qualibrate
     # migrated
     try:
         model = get_config_model_part()
     except (RuntimeError, ValueError) as ex:
-        raise RuntimeError(error_msg) from ex
+        raise RuntimeError(common_error_msg) from ex
     return model.qualibrate
 
 
