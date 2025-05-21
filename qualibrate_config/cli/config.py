@@ -131,12 +131,12 @@ __all__ = ["config_command"]
 )
 @click.option(
     "--calibration-library-folder",
-    "--runner-calibration-library-resolver",
+    "--runner-calibration-library-folder",
     type=click.Path(file_okay=False, dir_okay=True, path_type=Path),
     default=QUALIBRATE_PATH / "calibrations",
     show_default=True,
     cls=DeprecatedOption,
-    deprecated=("--runner-calibration-library-resolver",),
+    deprecated=("--runner-calibration-library-folder",),
     preferred="--calibration-library-folder",
     help="Path to the folder contains calibration nodes and graphs.",
 )
