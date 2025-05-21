@@ -28,7 +28,6 @@ def make_deprecated_process(
 ) -> Callable[[ParserOption, Any, ParsingState], None]:
     """Construct a closure to the parser option processor"""
     option_instance = option.obj
-    _validate_deprecated_option(option_instance)
     original_process = option.process
     deprecated, preferred = _validate_deprecated_option(option_instance)
 
