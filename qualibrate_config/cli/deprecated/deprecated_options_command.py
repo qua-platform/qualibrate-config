@@ -16,8 +16,7 @@ def _validate_deprecated_option(
     option: CoreOption,
 ) -> tuple[Sequence[str], str]:
     assert isinstance(option, DeprecatedOption)
-    deprecated = option.deprecated
-    preferred = option.preferred
+    deprecated, preferred = option.deprecated_preferred
     msg = "Expected `deprecated` value for `{}`"
     assert deprecated is not None, msg.format(option.name)
     return deprecated, preferred

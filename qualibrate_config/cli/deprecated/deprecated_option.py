@@ -13,6 +13,10 @@ class DeprecatedOption(click.Option):
         deprecated: Optional[tuple[str]] = None,
         **kwargs: Any,
     ):
-        self.deprecated = deprecated or ()
-        self.preferred = preferred or args[0][-1]
+        self.__deprecated = deprecated or ()
+        self.__preferred = preferred or args[0][-1]
         super().__init__(*args, **kwargs)
+
+    @property
+    def deprecated_preferred(self) -> tuple[tuple[str, ...], str]:
+        return self.__deprecated, self.__preferred
