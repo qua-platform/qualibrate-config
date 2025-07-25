@@ -2,6 +2,11 @@ import sys
 from pathlib import Path
 from typing import Optional, Union
 
+from qualibrate_config.core.project.common import (
+    get_project_from_common_config,
+    read_project_config_file,
+)
+from qualibrate_config.core.utils import recursive_update_dict
 from qualibrate_config.qulibrate_types import RawConfigType
 from qualibrate_config.references.resolvers import resolve_references
 from qualibrate_config.vars import (
@@ -57,6 +62,10 @@ def read_config_file(
 ) -> RawConfigType:
     with config_file.open("rb") as fin:
         config: RawConfigType = tomllib.load(fin)  # typing for mypy tomli
+    if (project := get_project_from_common_config(config)) and (
+        project_config := read_project_config_file(config_file, project)
+    ):
+        config = recursive_update_dict(config, project_config)
     if not solve_references:
         return config
     return resolve_references(config)
