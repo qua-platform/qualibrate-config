@@ -9,6 +9,7 @@ from qualibrate_config.cli.deprecated import (
     DeprecatedOption,
     DeprecatedOptionsCommand,
 )
+from qualibrate_config.cli.vars import CONFIG_PATH_HELP
 from qualibrate_config.core.content import (
     get_config_file_content,
     simple_write,
@@ -46,13 +47,7 @@ __all__ = ["config_command"]
     ),
     default=DEFAULT_CONFIG_FILEPATH,
     show_default=True,
-    help=(
-        "Path to the configuration file. If the path points to a file, it will "
-        "be read and the old configuration will be reused, except for the "
-        "variables specified by the user. If the file does not exist, a new one"
-        " will be created. If the path points to a directory, a check will be "
-        "made to see if files with the default name exist."
-    ),
+    help=CONFIG_PATH_HELP,
 )
 @click.option(
     "--auto-accept",
