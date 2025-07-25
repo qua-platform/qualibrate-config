@@ -28,7 +28,7 @@ from qualibrate_config.validation import (
     qualibrate_version_validator,
 )
 from qualibrate_config.vars import (
-    DEFAULT_CONFIG_FILENAME,
+    DEFAULT_CONFIG_FILEPATH,
     QUALIBRATE_CONFIG_KEY,
     QUALIBRATE_PATH,
 )
@@ -43,7 +43,7 @@ __all__ = ["config_command"]
         exists=False,
         path_type=Path,
     ),
-    default=QUALIBRATE_PATH / DEFAULT_CONFIG_FILENAME,
+    default=DEFAULT_CONFIG_FILEPATH,
     show_default=True,
     help=(
         "Path to the configuration file. If the path points to a file, it will "

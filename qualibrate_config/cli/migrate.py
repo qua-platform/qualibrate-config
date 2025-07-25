@@ -8,7 +8,7 @@ from qualibrate_config.cli.utils.migration_utils import make_migrations
 from qualibrate_config.models import QualibrateConfig
 from qualibrate_config.models.qualibrate import QualibrateTopLevelConfig
 from qualibrate_config.vars import (
-    DEFAULT_CONFIG_FILENAME,
+    DEFAULT_CONFIG_FILEPATH,
     QUALIBRATE_CONFIG_KEY,
     QUALIBRATE_PATH,
 )
@@ -23,7 +23,7 @@ __all__ = ["migrate_command"]
         exists=False,
         path_type=Path,
     ),
-    default=QUALIBRATE_PATH / DEFAULT_CONFIG_FILENAME,
+    default=DEFAULT_CONFIG_FILEPATH,
     show_default=True,
     help=(
         "Path to the configuration file. If the path points to a file, it will "
