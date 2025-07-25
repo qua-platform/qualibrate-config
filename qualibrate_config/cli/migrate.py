@@ -16,7 +16,7 @@ from qualibrate_config.vars import (
 __all__ = ["migrate_command"]
 
 
-@click.command(name="migrate")
+@click.command(name="migrate", help="Migrate qualibrate config files")
 @click.option(
     "--config-path",
     type=click.Path(

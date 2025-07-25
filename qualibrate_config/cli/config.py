@@ -36,7 +36,11 @@ from qualibrate_config.vars import (
 __all__ = ["config_command"]
 
 
-@click.command(name="config", cls=DeprecatedOptionsCommand)
+@click.command(
+    name="config",
+    cls=DeprecatedOptionsCommand,
+    help="Common config definition",
+)
 @click.option(
     "--config-path",
     type=click.Path(
