@@ -4,7 +4,7 @@ from typing import Callable, Optional, TypeVar
 
 import tomli_w
 
-from qualibrate_config.cli.utils.approve import print_and_confirm
+from qualibrate_config.core.approve import print_and_confirm
 from qualibrate_config.file import get_config_file
 from qualibrate_config.models import BaseConfig
 from qualibrate_config.qulibrate_types import RawConfigType
@@ -13,7 +13,7 @@ from qualibrate_config.vars import (
 )
 
 if sys.version_info[:2] < (3, 11):
-    import tomli as tomllib
+    import tomli as tomllib  # type: ignore[unused-ignore,import-not-found]
 else:
     import tomllib
 

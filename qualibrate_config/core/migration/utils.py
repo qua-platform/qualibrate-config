@@ -1,7 +1,7 @@
 import importlib
 from typing import Callable
 
-from qualibrate_config.cli.migrations.base import MigrateBase
+from qualibrate_config.core.migration.migrations.base import MigrateBase
 from qualibrate_config.qulibrate_types import RawConfigType
 
 

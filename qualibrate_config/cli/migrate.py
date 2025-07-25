@@ -1,17 +1,10 @@
 from pathlib import Path
 
 import click
-import tomli_w
 
-from qualibrate_config.cli.utils.content import get_config_file_content
-from qualibrate_config.cli.utils.migration_utils import make_migrations
+from qualibrate_config.core.migration.migrate import run_migrations
 from qualibrate_config.models import QualibrateConfig
-from qualibrate_config.models.qualibrate import QualibrateTopLevelConfig
-from qualibrate_config.vars import (
-    DEFAULT_CONFIG_FILEPATH,
-    QUALIBRATE_CONFIG_KEY,
-    QUALIBRATE_PATH,
-)
+from qualibrate_config.vars import DEFAULT_CONFIG_FILEPATH
 
 __all__ = ["migrate_command"]
 
@@ -34,33 +27,11 @@ __all__ = ["migrate_command"]
     ),
 )
 @click.argument("to_version", type=int, default=QualibrateConfig.version)
-@click.pass_context
-def migrate_command(
-    ctx: click.Context, config_path: Path, to_version: int
-) -> None:
-    common_config, config_file = get_config_file_content(config_path)
-    if common_config == {}:
-        click.secho("Config file wasn't found. Nothing to migrate", fg="yellow")
-        return
-    qualibrate_config = common_config.get(QUALIBRATE_CONFIG_KEY, {})
-    from_version = qualibrate_config.get("version") or qualibrate_config.get(
-        "config_version"
+def migrate_command(config_path: Path, to_version: int) -> None:
+    run_migrations(
+        config_path=config_path,
+        to_version=to_version,
     )
-    if from_version is None:
-        click.secho(
-            "Can't resolve current config version from file. Please regenerate "
-            "config using `qualibrate-config config` command.",
-            fg="yellow",
-        )
-        return
-    if from_version == to_version:
-        click.echo("You have latest config version. Nothing to migrate.")
-        return
-    migrated = make_migrations(common_config, from_version, to_version)
-    if to_version == QualibrateConfig.version:
-        QualibrateTopLevelConfig(migrated)
-    with config_file.open("wb") as f_out:
-        tomli_w.dump(migrated, f_out)
 
 
 if __name__ == "__main__":

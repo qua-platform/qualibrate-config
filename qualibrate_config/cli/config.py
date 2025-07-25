@@ -9,23 +9,20 @@ from qualibrate_config.cli.deprecated import (
     DeprecatedOption,
     DeprecatedOptionsCommand,
 )
-from qualibrate_config.cli.migrate import migrate_command
-from qualibrate_config.cli.utils.content import (
+from qualibrate_config.core.content import (
     get_config_file_content,
     simple_write,
     write_config,
 )
-from qualibrate_config.cli.utils.defaults import get_user_storage
-from qualibrate_config.cli.utils.from_sources import (
+from qualibrate_config.core.defaults import get_user_storage
+from qualibrate_config.core.from_sources import (
     qualibrate_config_from_sources,
 )
 from qualibrate_config.models.qualibrate import QualibrateTopLevelConfig
 from qualibrate_config.models.storage_type import StorageType
 from qualibrate_config.qulibrate_types import RawConfigType
 from qualibrate_config.validation import (
-    GreaterThanSupportedQualibrateConfigVersionError,
-    InvalidQualibrateConfigVersionError,
-    qualibrate_version_validator,
+    validate_version_and_migrate_if_needed,
 )
 from qualibrate_config.vars import (
     DEFAULT_CONFIG_FILEPATH,
@@ -236,21 +233,9 @@ def config_command(
 ) -> None:
     common_config, config_file = get_config_file_content(config_path)
     old_config = deepcopy(common_config)
-    try:
-        qualibrate_version_validator(common_config, False)
-    except GreaterThanSupportedQualibrateConfigVersionError as ex:
-        error_msg = (
-            f"QUAlibrate was unable to load the config. {str(ex)}. If this "
-            f'problem persists, please delete "{config_path}" and retry '
-            'running "qualibrate config"'
-        )
-        raise RuntimeError(error_msg) from ex
-    except InvalidQualibrateConfigVersionError:
-        if common_config:
-            migrate_command(
-                ["--config-path", config_path], standalone_mode=False
-            )
-            common_config, config_file = get_config_file_content(config_path)
+    common_config, config_file = validate_version_and_migrate_if_needed(
+        common_config, config_file
+    )
     qualibrate_config = common_config.get(QUALIBRATE_CONFIG_KEY, {})
     required_subconfigs = ("storage",)
     optional_subconfigs = ("app", "runner", "composite", "calibration_library")

@@ -2,7 +2,7 @@ from .base import BaseConfig, Importable, PathSerializer
 from .calibration_library import CalibrationLibraryConfig
 from .composite import QualibrateCompositeConfig
 from .q_app import QualibrateAppConfig
-from .qualibrate import QualibrateConfig
+from .qualibrate import QualibrateConfig, QualibrateTopLevelConfig
 from .remote_services import (
     JsonTimelineDBRemoteServiceConfig,
     QuaDashboardSubServiceConfig,
@@ -23,6 +23,7 @@ __all__ = [
     "QualibrateCompositeConfig",
     "QualibrateAppConfig",
     "QualibrateConfig",
+    "QualibrateTopLevelConfig",
     "JsonTimelineDBRemoteServiceConfig",
     "RemoteServiceBaseConfig",
     "SpawnServiceBaseConfig",
