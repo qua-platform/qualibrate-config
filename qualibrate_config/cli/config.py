@@ -9,7 +9,12 @@ from qualibrate_config.cli.deprecated import (
     DeprecatedOption,
     DeprecatedOptionsCommand,
 )
-from qualibrate_config.cli.vars import CONFIG_PATH_HELP
+from qualibrate_config.cli.vars import (
+    CALIBRATION_LIBRARY_FOLDER_HELP,
+    CONFIG_PATH_HELP,
+    QUAM_STATE_PATH_HELP,
+    STORAGE_LOCATION_HELP,
+)
 from qualibrate_config.core.content import (
     get_config_file_content,
     simple_write,
@@ -19,6 +24,7 @@ from qualibrate_config.core.defaults import get_user_storage
 from qualibrate_config.core.from_sources import (
     qualibrate_config_from_sources,
 )
+from qualibrate_config.models import PathSerializer
 from qualibrate_config.models.qualibrate import QualibrateTopLevelConfig
 from qualibrate_config.models.storage_type import StorageType
 from qualibrate_config.qulibrate_types import RawConfigType
@@ -29,6 +35,8 @@ from qualibrate_config.vars import (
     DEFAULT_CONFIG_FILEPATH,
     QUALIBRATE_CONFIG_KEY,
     QUALIBRATE_PATH,
+    QUAM_CONFIG_KEY,
+    QUAM_STATE_PATH_CONFIG_KEY,
 )
 
 __all__ = ["config_command"]
@@ -107,9 +115,7 @@ __all__ = ["config_command"]
     type=click.Path(file_okay=False, dir_okay=True, path_type=Path),
     default=get_user_storage(),
     show_default=True,
-    help=(
-        "Path to the local user storage. Used for storing nodes output data."
-    ),
+    help=STORAGE_LOCATION_HELP,
 )
 @click.option(
     "--calibration-library-resolver",
@@ -134,7 +140,7 @@ __all__ = ["config_command"]
     cls=DeprecatedOption,
     deprecated=("--runner-calibration-library-folder",),
     preferred="--calibration-library-folder",
-    help="Path to the folder contains calibration nodes and graphs.",
+    help=CALIBRATION_LIBRARY_FOLDER_HELP,
 )
 @click.option(
     "--spawn-runner",
@@ -202,7 +208,7 @@ __all__ = ["config_command"]
     required=False,
     deprecated=("--active-machine-path",),
     preferred="--quam-state-path",
-    help="Path to the quam state.",
+    help=QUAM_STATE_PATH_HELP,
 )
 @click.option("--check-generator", is_flag=True, hidden=True)
 @click.pass_context
@@ -261,15 +267,18 @@ def config_command(
 def _temporary_fill_quam_state_path(
     common_config: RawConfigType, state_path: Optional[Path]
 ) -> RawConfigType:
-    quam = common_config.get("quam", {})
+    quam = common_config.setdefault(QUAM_CONFIG_KEY, {})
     active_machine = common_config.get("active_machine", {})
     new_state_path = (
-        state_path or quam.get("state_path") or active_machine.get("path")
+        state_path
+        or quam.get(QUAM_STATE_PATH_CONFIG_KEY)
+        or active_machine.get("path")
     )
     if new_state_path is None:
         return common_config
-    quam["state_path"] = str(new_state_path)
-    common_config.update({"quam": quam})
+    quam[QUAM_STATE_PATH_CONFIG_KEY] = PathSerializer.serialize_path(
+        new_state_path
+    )
     return common_config
 
 

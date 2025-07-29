@@ -5,3 +5,10 @@ CONFIG_PATH_HELP = (
     " will be created. If the path points to a directory, a check will be "
     "made to see if files with the default name exist."
 )
+CALIBRATION_LIBRARY_FOLDER_HELP = (
+    "Path to the folder contains calibration nodes and graphs."
+)
+STORAGE_LOCATION_HELP = (
+    "Path to the local user storage. Used for storing nodes output data."
+)
+QUAM_STATE_PATH_HELP = "Path to the quam state."
