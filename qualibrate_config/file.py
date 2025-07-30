@@ -11,6 +11,7 @@ from qualibrate_config.qulibrate_types import RawConfigType
 from qualibrate_config.references.resolvers import resolve_references
 from qualibrate_config.vars import (
     DEFAULT_CONFIG_FILENAME,
+    QUALIBRATE_CONFIG_KEY,
     QUALIBRATE_PATH,
 )
 
@@ -58,13 +59,17 @@ def get_config_file(
 
 
 def read_config_file(
-    config_file: Path, solve_references: bool = True
+    config_file: Path,
+    solve_references: bool = True,
+    override_project: Optional[str] = None,
 ) -> RawConfigType:
     with config_file.open("rb") as fin:
         config: RawConfigType = tomllib.load(fin)  # typing for mypy tomli
-    if (project := get_project_from_common_config(config)) and (
-        project_config := read_project_config_file(config_file, project)
-    ):
+    if project := (override_project or get_project_from_common_config(config)):
+        project_config = read_project_config_file(config_file, project)
+        project_config.setdefault(QUALIBRATE_CONFIG_KEY, {})["project"] = (
+            project
+        )
         config = recursive_update_dict(config, project_config)
     if not solve_references:
         return config

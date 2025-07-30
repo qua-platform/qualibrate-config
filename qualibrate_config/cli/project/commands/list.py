@@ -28,7 +28,7 @@ def list_command(config_path: Path, verbose: bool) -> None:
     print_ = (
         print_verbose_projects_list if verbose else print_simple_projects_list
     )
-    print_(config_path.parent)
+    print_(config_path)
 
 
 if __name__ == "__main__":
