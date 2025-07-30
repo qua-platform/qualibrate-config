@@ -23,9 +23,9 @@ def get_project_from_common_config(config: RawConfigType) -> Optional[str]:
 def read_project_config_file(
     config_path: Path,
     project_name: str,
-) -> Optional[RawConfigType]:
+) -> RawConfigType:
     project_config = get_project_config_path(config_path.parent, project_name)
     if not project_config.is_file():
-        return None
+        return {}
     with project_config.open("rb") as fin:
         return cast(RawConfigType, tomllib.load(fin))  # typing for mypy tomli
