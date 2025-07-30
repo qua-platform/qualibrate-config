@@ -19,7 +19,7 @@ def list_projects(qualibrate_path: Path) -> list[str]:
 
 
 def print_simple_projects_list(qualibrate_path: Path) -> None:
-    click.echo(f"Projects list: {', '.join(list_projects(qualibrate_path))}")
+    click.echo("\n".join(list_projects(qualibrate_path)))
 
 
 def print_verbose_projects_list(qualibrate_path: Path) -> None:
