@@ -2,25 +2,16 @@ import datetime
 import sys
 from os import stat_result
 from pathlib import Path
-from typing import Any
 
 import click
 
+from qualibrate_config.core.project.model import Project
 from qualibrate_config.core.project.path import (
     get_project_path,
     get_projects_path,
 )
 from qualibrate_config.file import read_config_file
 from qualibrate_config.vars import QUALIBRATE_CONFIG_KEY
-
-
-def list_projects(qualibrate_path: Path) -> list[str]:
-    return list(
-        map(
-            lambda p: p.name,
-            filter(Path.is_dir, get_projects_path(qualibrate_path).iterdir()),
-        )
-    )
 
 
 def _dt_from_ts(ts: float) -> datetime.datetime:
@@ -95,7 +86,7 @@ def _project_stat_dir(
 
 def project_stat(
     qualibrate_path: Path, project: str, config_path: Path
-) -> dict[str, Any]:
+) -> Project:
     project_path = get_project_path(qualibrate_path, project)
 
     config_dict = read_config_file(config_path, override_project=project)
@@ -118,11 +109,30 @@ def project_stat(
         nodes_number, created_at, last_modified_at = _project_stat_dir(
             project_path
         )
+    return Project(
+        name=project,
+        nodes_number=nodes_number,
+        created_at=created_at.astimezone(),
+        last_modified_at=last_modified_at.astimezone(),
+    )
+
+
+def list_projects(qualibrate_path: Path) -> list[str]:
+    return list(
+        map(
+            lambda p: p.name,
+            filter(Path.is_dir, get_projects_path(qualibrate_path).iterdir()),
+        )
+    )
+
+
+def verbose_list_projects(
+    config_path: Path,
+) -> dict[str, Project]:
+    qualibrate_path = config_path.parent
     return {
-        "name": project,
-        "nodes_number": nodes_number,
-        "created_at": created_at,
-        "last_modified": last_modified_at,
+        p_name: project_stat(qualibrate_path, p_name, config_path)
+        for p_name in list_projects(qualibrate_path)
     }
 
 
@@ -135,12 +145,5 @@ def print_simple_projects_list(
 def print_verbose_projects_list(
     config_path: Path,
 ) -> None:
-    qualibrate_path = config_path.parent
-    for p_name in list_projects(qualibrate_path):
-        stat = project_stat(qualibrate_path, p_name, config_path)
-        name = stat.pop("name")
-        click.echo(
-            "\n\t".join(
-                [f"Project '{name}'", *[f"{k}: {v}" for k, v in stat.items()]]
-            )
-        )
+    for p_stat in verbose_list_projects(config_path).values():
+        click.echo(p_stat.verbose_str())
