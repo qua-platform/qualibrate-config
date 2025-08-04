@@ -46,7 +46,7 @@ def _fill_path(
         return
     c_item = config
     for p in path:
-        c_item.setdefault(p, {})
+        c_item = c_item.setdefault(p, {})
     c_item[key] = PathSerializer.serialize_path(value)
 
 
