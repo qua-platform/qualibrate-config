@@ -190,7 +190,7 @@ def create_project(
     patches = jsonpatch.make_patch(old_config, common_config)
     project_config = jsonpatch_to_dict(patches)
     try:
-        create_project_config_file(config_path.parent, name, project_config)
+        create_project_config_file(qualibrate_path, name, project_config)
         after_create_project(storage_location, quam_state_path)
     except Exception as exc:
         rollback_project_creation(
