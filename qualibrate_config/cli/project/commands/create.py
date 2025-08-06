@@ -23,10 +23,7 @@ __all__ = ["create_command"]
 @click.argument("name", type=str)
 @click.option(
     "--config-path",
-    type=click.Path(
-        exists=False,
-        path_type=Path,
-    ),
+    type=click.Path(exists=True, path_type=Path),
     default=DEFAULT_CONFIG_FILEPATH,
     show_default=True,
     help=CONFIG_PATH_HELP,
@@ -58,9 +55,6 @@ def create_command(
     calibration_library_folder: Optional[Path],
     quam_state_path: Optional[Path],
 ) -> None:
-    if not config_path.is_file():
-        click.secho("Config file isn't defined.", fg="red")
-        return
     try:
         create_project(
             config_path,

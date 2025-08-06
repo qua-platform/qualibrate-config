@@ -13,10 +13,7 @@ from qualibrate_config.vars import DEFAULT_CONFIG_FILEPATH
 @click.argument("name", type=str)
 @click.option(
     "--config-path",
-    type=click.Path(
-        exists=False,
-        path_type=Path,
-    ),
+    type=click.Path(exists=True, path_type=Path),
     default=DEFAULT_CONFIG_FILEPATH,
     show_default=True,
     help=CONFIG_PATH_HELP,
