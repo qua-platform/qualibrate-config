@@ -1,3 +1,4 @@
+import sys
 from pathlib import Path
 
 import click
@@ -21,6 +22,8 @@ __all__ = ["switch_command"]
 def switch_command(project: str, config_path: Path) -> None:
     if switch_project(config_path, project):
         click.echo(f"Project switched to '{project}'.")
+    else:
+        sys.exit(1)
 
 
 if __name__ == "__main__":

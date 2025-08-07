@@ -1,3 +1,4 @@
+import sys
 from pathlib import Path
 
 import click
@@ -26,6 +27,7 @@ def delete_command(
         delete_project(config_path, name)
     except RuntimeError as e:
         click.secho(f"Failed to remove project '{name}'. {e}", fg="red")
+        sys.exit(1)
     else:
         click.echo(f"Successfully removed project '{name}'")
 

@@ -1,3 +1,4 @@
+import sys
 from pathlib import Path
 
 import click
@@ -29,7 +30,7 @@ def current_command(
             "config using `qualibrate-config config` command.",
             fg="yellow",
         )
-        return
+        sys.exit(1)
     click.echo(f"Current project is {project}")
 
 

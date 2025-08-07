@@ -1,3 +1,4 @@
+import sys
 from pathlib import Path
 from typing import Optional
 
@@ -66,6 +67,7 @@ def create_command(
         )
     except ValueError as e:
         click.secho(str(e), fg="red")
+        sys.exit(1)
 
 
 if __name__ == "__main__":
