@@ -4,6 +4,8 @@ from typing import Callable
 from qualibrate_config.core.migration.migrations.base import MigrateBase
 from qualibrate_config.qulibrate_types import RawConfigType
 
+__all__ = ["migration_direction", "migration_functions", "make_migrations"]
+
 
 def migration_direction(from_version: int, to_version: int) -> bool:
     return to_version > from_version
