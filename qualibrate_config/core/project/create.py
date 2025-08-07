@@ -130,13 +130,27 @@ def config_for_project_from_context(
         raise ValueError("Context isn't passed.")
     q_config = common_config.get(QUALIBRATE_CONFIG_KEY, {})
     required_subconfigs = ("storage",)
-    optional_subconfigs = ("calibration_library",)
+    optional_subconfigs = (
+        ("calibration_library",)
+        if (
+            calibration_library_folder
+            or q_config("calibration_library") is not None
+        )
+        else tuple()
+    )
     q_config = qualibrate_config_from_sources(
         context,
         q_config,
         required_subconfigs,
         optional_subconfigs,
     )
+    if (
+        calibration_library_folder is not None
+        and q_config.get("calibration_library").get("resolver") is None
+    ):
+        raise ValueError(
+            "Calibration library folder can't be specified without a resolver."
+        )
     qs = QualibrateTopLevelConfig({QUALIBRATE_CONFIG_KEY: q_config})
     common_config.update(qs.serialize())
     fill_project_quam_state_path(common_config, quam_state_path)
