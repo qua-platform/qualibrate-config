@@ -203,7 +203,7 @@ class BaseConfig:
                 class_annotations = parent.__annotations__
                 for attr, annot in class_annotations.items():
                     if attr not in type_hints:
-                        raise AttributeError("Unkown attribute")
+                        raise AttributeError("Unknown attribute")
                     if get_origin(annot) is not Annotated:
                         type_hints[attr] = (type_hints[attr], None)
                         continue
