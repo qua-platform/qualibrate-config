@@ -152,10 +152,7 @@ class BaseConfig:
         return None
 
     def _parse_value(self, key: str, value: Any, expected_type: type) -> Any:
-        """
-        Parses and validates a value based on the expected type.
-
-        """
+        """Parses and validates a value based on the expected type."""
         origin = get_origin(expected_type) or expected_type
         args = get_args(expected_type)
 
