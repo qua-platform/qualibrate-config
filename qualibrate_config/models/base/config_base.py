@@ -274,7 +274,17 @@ class BaseConfig:
             annotation = annotation_with_default
         if value is None and isinstance(default, DefaultConfigValue):
             value = default.value
+        # left or - for type annotations; right or - for types directly
         annotation_type = get_origin(annotation) or annotation
+        # handle Optional
+        if (
+            annotation_type is Union
+            and (ann_args := get_args(annotation))
+            and (len(ann_args) == 2)
+            and (ann_args[1] is type(None))
+        ):
+            annotation_type = ann_args[0]
+
         if not isinstance(annotation_type, type):
             return value
         if issubclass(annotation_type, Importable):
