@@ -1,16 +1,16 @@
+import inspect
 import sys
 from pathlib import Path
-from typing import Callable, Optional, TypeVar
+from typing import Callable, Optional, TypeVar, Union, cast, overload
 
 import tomli_w
 
 from qualibrate_config.core.approve import print_and_confirm
+from qualibrate_config.core.project.path import get_project_path
 from qualibrate_config.file import get_config_file
 from qualibrate_config.models import BaseConfig
 from qualibrate_config.qulibrate_types import RawConfigType
-from qualibrate_config.vars import (
-    DEFAULT_CONFIG_FILENAME,
-)
+from qualibrate_config.vars import DEFAULT_CONFIG_FILENAME
 
 if sys.version_info[:2] < (3, 11):
     import tomli as tomllib  # type: ignore[unused-ignore,import-not-found]
@@ -22,11 +22,16 @@ __all__ = [
     "ConfigType",
     "get_config_file_content",
     "simple_write",
-    "qualibrate_before_write_cb",
+    "qualibrate_after_write_cb",
     "write_config",
 ]
 
 ConfigType = TypeVar("ConfigType", bound=BaseConfig)
+# Non-generic callback alias to avoid "Missing type parameters" errors
+Callback = Union[
+    Callable[[BaseConfig], None],
+    Callable[[BaseConfig, Optional[Path]], None],
+]
 
 
 def get_config_file_content(config_path: Path) -> tuple[RawConfigType, Path]:
@@ -45,13 +50,49 @@ def simple_write(path: Path, config: RawConfigType) -> None:
         tomli_w.dump(config, f_out)
 
 
-def qualibrate_before_write_cb(config: ConfigType) -> None:
+def qualibrate_after_write_cb(
+    config: BaseConfig,
+    config_file: Optional[Path] = None,
+) -> None:
     if config.project in config.storage.location.parts:
         config.storage.location.mkdir(parents=True, exist_ok=True)
     else:
         (config.storage.location / config.project).mkdir(
             parents=True, exist_ok=True
         )
+    if config_file is not None:
+        project_path = get_project_path(config_file.parent, config.project)
+        project_path.mkdir(parents=True, exist_ok=True)
+
+
+# Overloads tell mypy the two legal shapes
+@overload
+def _call_cb(cb: None, config: BaseConfig, config_file: Path) -> None: ...
+@overload
+def _call_cb(
+    cb: Callable[[BaseConfig], None], config: BaseConfig, config_file: Path
+) -> None: ...
+@overload
+def _call_cb(
+    cb: Callable[[BaseConfig, Optional[Path]], None],
+    config: BaseConfig,
+    config_file: Path,
+) -> None: ...
+def _call_cb(
+    cb: Optional[Callback],
+    config: BaseConfig,
+    config_file: Path,
+) -> None:
+    if cb is None:
+        return
+    # Runtime dispatch, then cast to keep mypy satisfied
+    params_cnt = len(inspect.signature(cb).parameters)
+    if params_cnt == 1:
+        cb1 = cast(Callable[[BaseConfig], None], cb)
+        cb1(config)
+    else:
+        cb2 = cast(Callable[[BaseConfig, Optional[Path]], None], cb)
+        cb2(config, config_file)
 
 
 def write_config(
@@ -59,7 +100,8 @@ def write_config(
     common_config: RawConfigType,
     config: ConfigType,
     config_key: str,
-    before_write_cb: Optional[Callable[[ConfigType], None]] = None,
+    before_write_cb: Optional[Callback] = None,
+    after_write_cb: Optional[Callback] = None,
     confirm: bool = True,
     check_generator: bool = False,
 ) -> None:
@@ -67,9 +109,13 @@ def write_config(
     common_config[config_key] = exported_data
     if confirm or check_generator:
         print_and_confirm(config_file, common_config, check_generator)
-    if before_write_cb is None:
-        before_write_cb = qualibrate_before_write_cb
-    before_write_cb(config)
+
+    _call_cb(before_write_cb, config, config_file)
+
     if not config_file.parent.exists():
         config_file.parent.mkdir(parents=True)
     simple_write(config_file, common_config)
+
+    if after_write_cb is None:
+        after_write_cb = qualibrate_after_write_cb
+    _call_cb(after_write_cb, config, config_file)
