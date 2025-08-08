@@ -63,6 +63,7 @@ def read_config_file(
     solve_references: bool = True,
     override_project: Optional[str] = None,
 ) -> RawConfigType:
+    # TODO: second location of tomllib.loads
     with config_file.open("rb") as fin:
         config: RawConfigType = tomllib.load(fin)  # typing for mypy tomli
     if project := (override_project or get_project_from_common_config(config)):

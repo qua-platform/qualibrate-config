@@ -34,6 +34,7 @@ def get_config_file_content(config_path: Path) -> tuple[RawConfigType, Path]:
     config_file = get_config_file(
         config_path, DEFAULT_CONFIG_FILENAME, raise_not_exists=False
     )
+    # TODO: first location of tomllib.loads
     if config_file.is_file():
         return tomllib.loads(config_file.read_text()), config_path
     return {}, config_file
