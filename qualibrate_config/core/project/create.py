@@ -146,7 +146,7 @@ def config_for_project_from_context(
     )
     if (
         calibration_library_folder is not None
-        and q_config.get("calibration_library").get("resolver") is None
+        and q_config.get("calibration_library", {}).get("resolver") is None
     ):
         raise ValueError(
             "Calibration library folder can't be specified without a resolver."

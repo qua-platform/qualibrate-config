@@ -150,7 +150,10 @@ def test_config_for_project_from_context_valid(mocker, paths):
 
     qualibrate_config_from_sources = mocker.patch(
         "qualibrate_config.core.project.create.qualibrate_config_from_sources",
-        return_value={"storage": {"location": "foo"}},
+        return_value={
+            "storage": {"location": "foo"},
+            "calibration_library": {"resolver": "r"},
+        },
     )
     mocker.patch(
         "qualibrate_config.core.project.create.QualibrateTopLevelConfig",
@@ -168,6 +171,32 @@ def test_config_for_project_from_context_valid(mocker, paths):
     assert QUALIBRATE_CONFIG_KEY in result
     assert QUAM_CONFIG_KEY in result
     qualibrate_config_from_sources.assert_called_once()
+
+
+def test_config_for_project_from_context_calibration_library_without_resolver(
+    mocker, paths
+):
+    cfg = {}
+    dummy_command = click.Command("dummy")
+    context = click.Context(dummy_command)
+
+    mocker.patch(
+        "qualibrate_config.core.project.create.qualibrate_config_from_sources",
+        return_value={"storage": {"location": "foo"}},
+    )
+    mocker.patch(
+        "qualibrate_config.core.project.create.QualibrateTopLevelConfig",
+        side_effect=lambda d: SimpleNamespace(serialize=lambda: d),
+    )
+    with pytest.raises(ValueError):
+        create_m.config_for_project_from_context(
+            cfg,
+            paths.storage_location,
+            paths.calibration_library_folder,
+            paths.quam_state_path,
+            context,
+        )
+
 
 
 def test_config_for_project_from_context_raises_if_none():
