@@ -198,7 +198,6 @@ def test_config_for_project_from_context_calibration_library_without_resolver(
         )
 
 
-
 def test_config_for_project_from_context_raises_if_none():
     with pytest.raises(ValueError):
         create_m.config_for_project_from_context({}, None, None, None, None)
