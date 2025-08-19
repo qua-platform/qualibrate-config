@@ -56,6 +56,18 @@ def migrate_command(
     if from_version == to_version:
         click.echo("You have latest config version. Nothing to migrate.")
         return
+    if from_version > to_version:
+        # TODO: merge with `qualibrate_version_validator`
+        click.secho(
+            (
+                f"You have config version ({from_version}) greater than "
+                f"supported ({QualibrateConfig.version}). Please update your "
+                f"qualibrate-config package (pip install --upgrade "
+                f"qualibrate-config)."
+            ),
+            fg="yellow",
+        )
+        return
     migrated = make_migrations(common_config, from_version, to_version)
     if to_version == QualibrateConfig.version:
         QualibrateTopLevelConfig(migrated)
