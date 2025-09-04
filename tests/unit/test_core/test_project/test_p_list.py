@@ -221,6 +221,17 @@ def test_project_stat_with_no_storage_defined(mocker, tmp_path):
     assert isinstance(project_obj.last_modified_at, datetime)
 
 
+def test_list_projects_not_exists(mocker, tmp_path):
+    projects = tmp_path / "p1"
+    mock_path = mocker.patch(
+        "qualibrate_config.core.project.p_list.get_projects_path",
+        return_value=tmp_path,
+    )
+    result = p_list.list_projects(projects)
+    assert result == []
+    mock_path.assert_called_once_with(projects)
+
+
 def test_list_projects_with_two_dirs(mocker, tmp_path):
     projects = [tmp_path / "p1", tmp_path / "p2"]
     for p in projects:

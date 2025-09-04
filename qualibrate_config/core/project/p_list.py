@@ -118,10 +118,13 @@ def project_stat(
 
 
 def list_projects(qualibrate_path: Path) -> list[str]:
+    projects_path = get_projects_path(qualibrate_path)
+    if not projects_path.is_dir():
+        return []
     return list(
         map(
             lambda p: p.name,
-            filter(Path.is_dir, get_projects_path(qualibrate_path).iterdir()),
+            filter(Path.is_dir, projects_path.iterdir()),
         )
     )
 
