@@ -120,7 +120,9 @@ def project_stat(
 def list_projects(qualibrate_path: Path) -> list[str]:
     projects_path = get_projects_path(qualibrate_path)
     if not projects_path.is_dir():
-        return []
+        raise NotADirectoryError(
+            f"Projects path '{projects_path}' is not a directory"
+        )
     return list(
         map(
             lambda p: p.name,

@@ -183,9 +183,13 @@ def create_project(
     ctx: Optional[Context] = None,
 ) -> None:
     qualibrate_path = config_path.parent
-    projects = list_projects(qualibrate_path)
-    if name in projects:
-        raise ValueError(f"Project '{name}' already exists.")
+    try:
+        projects = list_projects(qualibrate_path)
+    except NotADirectoryError:
+        pass
+    else:
+        if name in projects:
+            raise ValueError(f"Project '{name}' already exists.")
     common_config, config_file = get_config_file_content(config_path)
     common_config, config_file = validate_version_and_migrate_if_needed(
         common_config, config_file

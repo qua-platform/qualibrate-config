@@ -9,7 +9,12 @@ from qualibrate_config.core.project.path import get_project_path
 
 def delete_project(config_path: Path, project: str) -> None:
     qualibrate_path = config_path.parent
-    if project not in list_projects(qualibrate_path):
+    try:
+        projects = list_projects(qualibrate_path)
+    except NotADirectoryError as e:
+        # there is no any project
+        raise RuntimeError("Projects dir doesn't exist.") from e
+    if project not in projects:
         raise RuntimeError(f"Project '{project}' does not exist")
     common_config, config_file = get_config_file_content(config_path)
     current_project = get_project_from_common_config(common_config)
