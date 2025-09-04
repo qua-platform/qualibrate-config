@@ -63,6 +63,7 @@ def qualibrate_after_write_cb(
     if config_file is not None:
         project_path = get_project_path(config_file.parent, config.project)
         project_path.mkdir(parents=True, exist_ok=True)
+        (project_path / DEFAULT_CONFIG_FILENAME).touch()
 
 
 # Overloads tell mypy the two legal shapes
