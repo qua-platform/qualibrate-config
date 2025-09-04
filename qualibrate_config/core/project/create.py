@@ -134,7 +134,7 @@ def config_for_project_from_context(
         ("calibration_library",)
         if (
             calibration_library_folder
-            or q_config("calibration_library") is not None
+            or q_config.get("calibration_library") is not None
         )
         else tuple()
     )
