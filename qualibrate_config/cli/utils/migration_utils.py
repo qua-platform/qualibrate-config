@@ -1,56 +1,27 @@
-import importlib
-from typing import Callable
+import functools
+import warnings
 
-from qualibrate_config.cli.migrations.base import MigrateBase
-from qualibrate_config.qulibrate_types import RawConfigType
+from qualibrate_config.cli.utils import deprecated_alias
+from qualibrate_config.core.migration import utils as _migration_utils
 
+__all__ = _migration_utils.__all__
 
-def migration_direction(from_version: int, to_version: int) -> bool:
-    return to_version > from_version
+deprecated_m = "qualibrate_config.cli.utils.migration_utils"
+new_m = "qualibrate_config.core.migration.utils"
+warnings.warn(
+    (
+        f"Module '{deprecated_m}' is deprecated and will be removed in a "
+        f"future version. Please use '{new_m}' instead."
+    ),
+    DeprecationWarning,
+    stacklevel=2,
+)
 
+l_deprecated = functools.partial(
+    deprecated_alias, deprecated_module=deprecated_m, new_module=new_m
+)
 
-def migration_functions(
-    from_version: int,
-    to_version: int,
-    migrations_package: str,
-    module_name_format: str,
-) -> list[Callable[[RawConfigType], RawConfigType]]:
-    direction = migration_direction(from_version, to_version)
-    version_step = 1 if direction else -1
-    versions = range(from_version, to_version, version_step)
-    functions = []
-    for version in versions:
-        other_version = version + version_step
-        minmax = (
-            (version, other_version) if direction else (other_version, version)
-        )
-        module_name = module_name_format.format(minmax[0], minmax[1])
-        full_module_name = f"{migrations_package}.{module_name}"
-        module = importlib.import_module(full_module_name)
-        if not hasattr(module, "Migrate") or not issubclass(
-            module.Migrate, MigrateBase
-        ):
-            raise AttributeError(
-                f"Module {full_module_name} has no Migrate class or it "
-                f"has invalid hierarchy"
-            )
-        function = (
-            module.Migrate.forward if direction else module.Migrate.backward
-        )
-        functions.append(function)
-    return functions
-
-
-def make_migrations(
-    data: RawConfigType,
-    from_version: int,
-    to_version: int,
-    migrations_package: str = "qualibrate_config.cli.migrations",
-    module_name_format: str = "v{}_v{}",
-) -> RawConfigType:
-    functions = migration_functions(
-        from_version, to_version, migrations_package, module_name_format
-    )
-    for function in functions:
-        data = function(data)
-    return data
+# Apply decorator to each re-exported function
+make_migrations = l_deprecated(
+    name="make_migrations",
+)(_migration_utils.make_migrations)

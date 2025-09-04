@@ -1,6 +1,10 @@
 import click
 
-from qualibrate_config.cli import config_command, migrate_command
+from qualibrate_config.cli import (
+    config_command,
+    migrate_command,
+    project_group,
+)
 
 
 @click.group()
@@ -10,6 +14,7 @@ def cli() -> None:
 
 cli.add_command(config_command)
 cli.add_command(migrate_command)
+cli.add_command(project_group)
 
 
 def main() -> None:

@@ -3,7 +3,7 @@ from importlib.util import find_spec
 from pathlib import Path
 from typing import Optional
 
-from qualibrate_config.cli.migrations.base import MigrateBase
+from qualibrate_config.core.migration.migrations.base import MigrateBase
 from qualibrate_config.qulibrate_types import RawConfigType
 
 

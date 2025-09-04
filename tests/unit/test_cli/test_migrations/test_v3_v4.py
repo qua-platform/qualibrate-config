@@ -2,7 +2,7 @@ from copy import deepcopy
 from importlib.util import find_spec
 from pathlib import Path
 
-from qualibrate_config.cli.migrations import v3_v4
+from qualibrate_config.core.migration.migrations import v3_v4
 
 CONFIG_V3 = {
     "qualibrate": {
@@ -81,7 +81,7 @@ def test_migrate_v4_v3_without_static_app_exists(mocker):
     config_v4["qualibrate"]["app"].pop("static_site_files")
     config_spec = find_spec("qualibrate_config")
     mocker.patch(
-        "qualibrate_config.cli.migrations.v3_v4.find_spec",
+        "qualibrate_config.core.migration.migrations.v3_v4.find_spec",
         return_value=config_spec,
     )
     config_v3_migrated = v3_v4.Migrate.backward(config_v4)
