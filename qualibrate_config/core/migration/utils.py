@@ -47,7 +47,7 @@ def make_migrations(
     data: RawConfigType,
     from_version: int,
     to_version: int,
-    migrations_package: str = "qualibrate_config.cli.migrations",
+    migrations_package: str = "qualibrate_config.core.migration.migrations",
     module_name_format: str = "v{}_v{}",
 ) -> RawConfigType:
     functions = migration_functions(
