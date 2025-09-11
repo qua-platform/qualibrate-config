@@ -12,7 +12,7 @@ class Migrate(MigrateBase):
     to_version: int = 4
 
     @staticmethod
-    def backward(data: RawConfigType) -> RawConfigType:
+    def backward(data: RawConfigType, config_path: Path) -> RawConfigType:
         data = deepcopy(data)
         qualibrate = data.pop("qualibrate")
         assert qualibrate.pop("version") == Migrate.to_version
@@ -33,7 +33,7 @@ class Migrate(MigrateBase):
         return {"qualibrate": qualibrate, **data}
 
     @staticmethod
-    def forward(data: RawConfigType) -> RawConfigType:
+    def forward(data: RawConfigType, config_path: Path) -> RawConfigType:
         data = deepcopy(data)
         new_qualibrate = data.pop("qualibrate")
         version = new_qualibrate.pop("version")

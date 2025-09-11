@@ -37,45 +37,45 @@ CONFIG_V3 = {
 }
 
 
-def test_migrate_v3_v4_default_static():
+def test_migrate_v3_v4_default_static(tmp_path):
     config_v3 = deepcopy(CONFIG_V3)
-    config_v4_migrated = v3_v4.Migrate.forward(config_v3)
+    config_v4_migrated = v3_v4.Migrate.forward(config_v3, tmp_path)
     config_v4_expected = config_v3
     config_v4_expected["qualibrate"]["app"].pop("static_site_files")
     config_v4_expected["qualibrate"]["version"] = 4
     assert config_v4_expected == config_v4_migrated
 
 
-def test_migrate_v3_v4_custom_static():
+def test_migrate_v3_v4_custom_static(tmp_path):
     config_v3 = deepcopy(CONFIG_V3)
     config_v3["qualibrate"]["app"]["static_site_files"] = (
         "/home/user/custom_static"
     )
-    config_v4_migrated = v3_v4.Migrate.forward(config_v3)
+    config_v4_migrated = v3_v4.Migrate.forward(config_v3, tmp_path)
     config_v4_expected = config_v3
     config_v4_expected["qualibrate"]["version"] = 4
     assert config_v4_expected == config_v4_migrated
 
 
-def test_migrate_v4_v3_with_static():
+def test_migrate_v4_v3_with_static(tmp_path):
     config_v3_expected = CONFIG_V3
     config_v4 = deepcopy(CONFIG_V3)
     config_v4["qualibrate"]["version"] = 4
-    config_v3_migrated = v3_v4.Migrate.backward(config_v4)
+    config_v3_migrated = v3_v4.Migrate.backward(config_v4, tmp_path)
     assert config_v3_expected == config_v3_migrated
 
 
-def test_migrate_v4_v3_without_static_no_app(mocker):
+def test_migrate_v4_v3_without_static_no_app(tmp_path):
     config_v4 = deepcopy(CONFIG_V3)
     config_v4["qualibrate"]["version"] = 4
     config_v4["qualibrate"]["app"].pop("static_site_files")
-    config_v3_migrated = v3_v4.Migrate.backward(config_v4)
+    config_v3_migrated = v3_v4.Migrate.backward(config_v4, tmp_path)
     config_v3_expected = config_v4
     config_v3_expected["qualibrate"]["version"] = 3
     assert config_v3_expected == config_v3_migrated
 
 
-def test_migrate_v4_v3_without_static_app_exists(mocker):
+def test_migrate_v4_v3_without_static_app_exists(mocker, tmp_path):
     config_v4 = deepcopy(CONFIG_V3)
     config_v4["qualibrate"]["version"] = 4
     config_v4["qualibrate"]["app"].pop("static_site_files")
@@ -84,7 +84,7 @@ def test_migrate_v4_v3_without_static_app_exists(mocker):
         "qualibrate_config.core.migration.migrations.v3_v4.find_spec",
         return_value=config_spec,
     )
-    config_v3_migrated = v3_v4.Migrate.backward(config_v4)
+    config_v3_migrated = v3_v4.Migrate.backward(config_v4, tmp_path)
     config_v3_expected = deepcopy(CONFIG_V3)
     config_v3_expected["qualibrate"]["app"]["static_site_files"] = str(
         Path(config_spec.origin).parents[1] / "qualibrate_static"

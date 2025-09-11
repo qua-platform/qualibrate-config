@@ -1,4 +1,5 @@
 from copy import deepcopy
+from pathlib import Path
 from typing import Optional
 
 from qualibrate_config.core.migration.migrations.base import MigrateBase
@@ -10,7 +11,7 @@ class Migrate(MigrateBase):
     to_version: int = 2
 
     @staticmethod
-    def backward(data: RawConfigType) -> RawConfigType:
+    def backward(data: RawConfigType, config_path: Path) -> RawConfigType:
         data = deepcopy(data)
         qualibrate = data.pop("qualibrate")
         quam: Optional[RawConfigType] = data.pop("quam", None)
@@ -40,7 +41,7 @@ class Migrate(MigrateBase):
         return new_data
 
     @staticmethod
-    def forward(data: RawConfigType) -> RawConfigType:
+    def forward(data: RawConfigType, config_path: Path) -> RawConfigType:
         data = deepcopy(data)
         new_qualibrate = data.pop("qualibrate")
         new_qualibrate.pop("config_version")

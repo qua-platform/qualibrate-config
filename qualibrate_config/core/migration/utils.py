@@ -1,4 +1,5 @@
 import importlib
+from pathlib import Path
 from typing import Callable
 
 from qualibrate_config.core.migration.migrations.base import MigrateBase
@@ -16,7 +17,7 @@ def migration_functions(
     to_version: int,
     migrations_package: str,
     module_name_format: str,
-) -> list[Callable[[RawConfigType], RawConfigType]]:
+) -> list[Callable[[RawConfigType, Path], RawConfigType]]:
     direction = migration_direction(from_version, to_version)
     version_step = 1 if direction else -1
     versions = range(from_version, to_version, version_step)
@@ -45,6 +46,7 @@ def migration_functions(
 
 def make_migrations(
     data: RawConfigType,
+    config_path: Path,
     from_version: int,
     to_version: int,
     migrations_package: str = "qualibrate_config.core.migration.migrations",
@@ -54,5 +56,5 @@ def make_migrations(
         from_version, to_version, migrations_package, module_name_format
     )
     for function in functions:
-        data = function(data)
+        data = function(data, config_path)
     return data
