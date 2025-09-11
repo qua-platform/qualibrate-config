@@ -1,6 +1,7 @@
 import shutil
 from copy import deepcopy
 from pathlib import Path
+from urllib.parse import urlparse, urlunparse
 
 from qualibrate_config.core.migration.migrations.base import MigrateBase
 from qualibrate_config.core.project.create import create_project_config_file
@@ -26,6 +27,16 @@ class Migrate(MigrateBase):
         qualibrate = data.pop("qualibrate")
         assert qualibrate.pop("version") == Migrate.from_version
         qualibrate["version"] = Migrate.to_version
+        if (runner := qualibrate.get("runner")) and (
+            address := runner.get("address")
+        ):
+            parsed = urlparse(address)
+            if parsed.hostname == "localhost":
+                runner["address"] = urlunparse(
+                    parsed._replace(
+                        netloc=parsed.netloc.replace("localhost", "127.0.0.1")
+                    )
+                )
         project_name = qualibrate.get("project")
         new_config = {"qualibrate": qualibrate, **data}
         if project_name is None:

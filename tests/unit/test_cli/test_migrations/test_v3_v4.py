@@ -21,7 +21,7 @@ CONFIG_V3 = {
             )
         },
         "runner": {
-            "address": "http://localhost:8001/execution/",
+            "address": "http://127.0.0.1:8001/execution/",
             "timeout": 1.0,
         },
         "composite": {

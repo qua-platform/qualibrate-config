@@ -49,7 +49,7 @@ def test_full_model():
             "location": "/tmp/user_storage/${#/project}",
         },
         "runner": {
-            "address": "http://localhost:8001/execution/",
+            "address": "http://127.0.0.1:8001/execution/",
             "timeout": 1.0,
         },
         "composite": {
@@ -80,7 +80,7 @@ def test_full_model():
     assert conf.app.static_site_files == Path("/tmp/qualibrate_static")
     assert conf.storage.type == StorageType.local_storage
     assert conf.storage.location == Path("/tmp/user_storage/init_project")
-    assert conf.runner.address == "http://localhost:8001/execution/"
+    assert conf.runner.address == "http://127.0.0.1:8001/execution/"
     assert conf.runner.timeout == 1.0
     assert conf.composite.app.spawn is True
     assert conf.composite.runner.spawn is True
