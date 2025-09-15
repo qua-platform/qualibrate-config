@@ -5,6 +5,7 @@ from pathlib import Path
 
 import click
 
+from qualibrate_config.core.project.common import read_project_config_file
 from qualibrate_config.core.project.model import Project
 from qualibrate_config.core.project.path import (
     get_project_path,
@@ -90,6 +91,7 @@ def project_stat(
     project_path = get_project_path(qualibrate_path, project)
 
     config_dict = read_config_file(config_path, override_project=project)
+    project_config = read_project_config_file(config_path, project)
     storage_location = (
         config_dict.get(QUALIBRATE_CONFIG_KEY, {})
         .get("storage", {})
@@ -114,6 +116,7 @@ def project_stat(
         nodes_number=nodes_number,
         created_at=created_at.astimezone(),
         last_modified_at=last_modified_at.astimezone(),
+        updates=project_config,
     )
 
 
