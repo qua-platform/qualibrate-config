@@ -40,7 +40,8 @@ def test_list_command_verbose(tmp_path, capsys):
 
     assert result.exit_code == 0
     out = result.output
-    assert "Project 'vproj'" in out
+    assert "Project: vproj" in out
     assert "nodes_number: " in out
     assert "created_at: " in out
     assert "last_modified_at: " in out
+    assert "config overrides: " in out
