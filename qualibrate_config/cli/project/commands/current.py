@@ -4,8 +4,7 @@ from pathlib import Path
 import click
 
 from qualibrate_config.cli.vars import CONFIG_PATH_HELP
-from qualibrate_config.core.content import get_config_file_content
-from qualibrate_config.core.project.common import get_project_from_common_config
+from qualibrate_config.core.project.active import get_active_project
 from qualibrate_config.vars import DEFAULT_CONFIG_FILEPATH
 
 __all__ = ["current_command"]
@@ -22,8 +21,7 @@ __all__ = ["current_command"]
 def current_command(
     config_path: Path,
 ) -> None:
-    common_config, config_file = get_config_file_content(config_path)
-    project = get_project_from_common_config(common_config)
+    project = get_active_project(config_path)
     if project is None:
         click.secho(
             "Can't resolve current config version from file. Please regenerate "
