@@ -45,8 +45,6 @@ def test_created_at_from_storage_with_dirs_subdir_ctime(
     mocker, tmp_path, storage_ts, subdir_ts, expected
 ):
     subdir = tmp_path / "a" / "#node"
-    storage_ts = storage_ts
-    subdir_ts = subdir_ts
     storage_stat = stat_result(
         [16832, -1, -1, 2, 1000, 1000, 4096, 1754377837, 1754377837, storage_ts]
     )
