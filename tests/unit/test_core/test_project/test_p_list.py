@@ -287,5 +287,5 @@ def test_print_verbose_projects_list(mocker, capsys, tmp_path):
     )
     p_list.print_verbose_projects_list(tmp_path / "config.toml")
     out = capsys.readouterr().out
-    assert "Project 'proj'" in out
+    assert "Project: proj" in out
     assert "nodes_number" in out
