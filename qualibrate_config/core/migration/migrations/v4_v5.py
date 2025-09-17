@@ -5,6 +5,7 @@ from urllib.parse import urlparse, urlunparse
 
 from qualibrate_config.core.migration.migrations.base import MigrateBase
 from qualibrate_config.core.project.create import create_project_config_file
+from qualibrate_config.core.project.path import get_projects_path
 from qualibrate_config.qulibrate_types import RawConfigType
 
 
@@ -18,7 +19,7 @@ class Migrate(MigrateBase):
         qualibrate = data.pop("qualibrate")
         assert qualibrate.pop("version") == Migrate.to_version
         qualibrate["version"] = Migrate.from_version
-        shutil.rmtree("projects", ignore_errors=True)
+        shutil.rmtree(get_projects_path(config_path.parent), ignore_errors=True)
         return {"qualibrate": qualibrate, **data}
 
     @staticmethod
