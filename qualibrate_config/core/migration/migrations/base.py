@@ -1,4 +1,5 @@
 from abc import ABC, abstractmethod
+from pathlib import Path
 
 from qualibrate_config.qulibrate_types import RawConfigType
 
@@ -9,10 +10,10 @@ class MigrateBase(ABC):
 
     @staticmethod
     @abstractmethod
-    def backward(data: RawConfigType) -> RawConfigType:
+    def backward(data: RawConfigType, config_path: Path) -> RawConfigType:
         pass
 
     @staticmethod
     @abstractmethod
-    def forward(data: RawConfigType) -> RawConfigType:
+    def forward(data: RawConfigType, config_path: Path) -> RawConfigType:
         pass

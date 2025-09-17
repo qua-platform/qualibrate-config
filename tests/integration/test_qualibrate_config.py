@@ -31,7 +31,7 @@ def test_minified_model():
     assert conf.composite is None
     assert conf.calibration_library is None
 
-    assert conf.version == 4
+    assert conf.version == 5
     assert conf.project == "init_project"
     assert conf.log_folder is None
     assert conf.storage.type == StorageType.local_storage
@@ -40,7 +40,7 @@ def test_minified_model():
 
 def test_full_model():
     conf_dict = {
-        "version": 4,
+        "version": 5,
         "project": "init_project",
         "log_folder": "/tmp/logs",
         "app": {"static_site_files": "/tmp/qualibrate_static"},
@@ -49,7 +49,7 @@ def test_full_model():
             "location": "/tmp/user_storage/${#/project}",
         },
         "runner": {
-            "address": "http://localhost:8001/execution/",
+            "address": "http://127.0.0.1:8001/execution/",
             "timeout": 1.0,
         },
         "composite": {
@@ -74,13 +74,13 @@ def test_full_model():
         conf.composite.qua_dashboards, QuaDashboardSubServiceConfig
     )
 
-    assert conf.version == 4
+    assert conf.version == 5
     assert conf.project == "init_project"
     assert conf.log_folder == Path("/tmp/logs")
     assert conf.app.static_site_files == Path("/tmp/qualibrate_static")
     assert conf.storage.type == StorageType.local_storage
     assert conf.storage.location == Path("/tmp/user_storage/init_project")
-    assert conf.runner.address == "http://localhost:8001/execution/"
+    assert conf.runner.address == "http://127.0.0.1:8001/execution/"
     assert conf.runner.timeout == 1.0
     assert conf.composite.app.spawn is True
     assert conf.composite.runner.spawn is True

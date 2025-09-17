@@ -152,10 +152,7 @@ class BaseConfig:
         return None
 
     def _parse_value(self, key: str, value: Any, expected_type: type) -> Any:
-        """
-        Parses and validates a value based on the expected type.
-
-        """
+        """Parses and validates a value based on the expected type."""
         origin = get_origin(expected_type) or expected_type
         args = get_args(expected_type)
 
@@ -206,7 +203,7 @@ class BaseConfig:
                 class_annotations = parent.__annotations__
                 for attr, annot in class_annotations.items():
                     if attr not in type_hints:
-                        raise AttributeError("Unkown attribute")
+                        raise AttributeError("Unknown attribute")
                     if get_origin(annot) is not Annotated:
                         type_hints[attr] = (type_hints[attr], None)
                         continue
@@ -256,42 +253,52 @@ class BaseConfig:
             res = super().__getattribute__(name)
             return res
         annotations = self._annotations
-        if name in annotations:
-            data = self._data
-            if name not in data:
-                raise AttributeError(
-                    f"There is no {name} in {self.__class__.__name__}."
-                )
-            value = data[name]
-            if self._is_reference(value):
-                if self.__class__._root is None:
-                    raise ValueError("Root shouldn't be None")
-                raw_dict = self._get_root()._raw_dict
-                return resolve_single_item(raw_dict, value)
-            annotation_with_default = annotations[name]
-            default: Optional[DefaultConfigValue] = None
-            if isinstance(annotation_with_default, tuple):
-                annotation, default = annotation_with_default
-            else:
-                annotation = annotation_with_default
-            if value is None and isinstance(default, DefaultConfigValue):
-                value = default.value
-            annotation_type = get_origin(annotation) or annotation
-            if not isinstance(annotation_type, type):
-                return value
-            if issubclass(annotation_type, Importable):
-                module, class_ = value.rsplit(".", maxsplit=1)
-                class_module = importlib.import_module(module)
-                return getattr(class_module, class_)
-            if issubclass(annotation_type, Path):
-                path_str = PathSerializer.serialize_path(value)
-                if not self._is_reference(path_str):
-                    return value
-                raw_dict = self._get_root()._raw_dict
-                resolved_path = resolve_single_item(raw_dict, path_str)
-                return Path(resolved_path)
+        if name not in annotations:
+            return super().__getattribute__(name)
+        data = self._data
+        if name not in data:
+            raise AttributeError(
+                f"There is no {name} in {self.__class__.__name__}."
+            )
+        value = data[name]
+        if self._is_reference(value):
+            if self.__class__._root is None:
+                raise ValueError("Root shouldn't be None")
+            raw_dict = self._get_root()._raw_dict
+            return resolve_single_item(raw_dict, value)
+        annotation_with_default = annotations[name]
+        default: Optional[DefaultConfigValue] = None
+        if isinstance(annotation_with_default, tuple):
+            annotation, default = annotation_with_default
+        else:
+            annotation = annotation_with_default
+        if value is None and isinstance(default, DefaultConfigValue):
+            value = default.value
+        # left or - for type annotations; right or - for types directly
+        annotation_type = get_origin(annotation) or annotation
+        # handle Optional
+        if (
+            annotation_type is Union
+            and (ann_args := get_args(annotation))
+            and (len(ann_args) == 2)
+            and (ann_args[1] is type(None))
+        ):
+            annotation_type = ann_args[0]
+
+        if not isinstance(annotation_type, type):
             return value
-        return super().__getattribute__(name)
+        if issubclass(annotation_type, Importable):
+            module, class_ = value.rsplit(".", maxsplit=1)
+            class_module = importlib.import_module(module)
+            return getattr(class_module, class_)
+        if issubclass(annotation_type, Path):
+            path_str = PathSerializer.serialize_path(value)
+            if not self._is_reference(path_str):
+                return value
+            raw_dict = self._get_root()._raw_dict
+            resolved_path = resolve_single_item(raw_dict, path_str)
+            return Path(resolved_path)
+        return value
 
     def __setattr__(self, name: str, value: Any) -> None:
         """

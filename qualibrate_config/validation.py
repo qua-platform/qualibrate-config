@@ -8,6 +8,8 @@ from typing import (
 import click
 from pydantic import ValidationError
 
+from qualibrate_config.core.content import get_config_file_content
+from qualibrate_config.core.migration.migrate import run_migrations
 from qualibrate_config.file import read_config_file
 from qualibrate_config.models import BaseConfig, QualibrateConfig
 from qualibrate_config.qulibrate_types import RawConfigType
@@ -115,6 +117,26 @@ def qualibrate_version_validator(
         passed=version,
         supported=QualibrateConfig.version,
     )
+
+
+def validate_version_and_migrate_if_needed(
+    common_config: dict[str, Any],
+    config_path: Path,
+) -> tuple[dict[str, Any], Path]:
+    try:
+        qualibrate_version_validator(common_config, False)
+    except GreaterThanSupportedQualibrateConfigVersionError as ex:
+        error_msg = (
+            f"QUAlibrate was unable to load the config. {str(ex)}. If this "
+            f'problem persists, please delete "{config_path}" and retry '
+            'running "qualibrate config"'
+        )
+        raise RuntimeError(error_msg) from ex
+    except InvalidQualibrateConfigVersionError:
+        if common_config:
+            run_migrations(config_path)
+            return get_config_file_content(config_path)
+    return common_config, config_path
 
 
 def get_config_solved_references_or_print_error(

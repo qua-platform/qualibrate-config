@@ -2,7 +2,7 @@ import os
 from collections.abc import Mapping
 from itertools import filterfalse
 from pathlib import Path
-from typing import Any
+from typing import IO, Any, Optional
 
 import click
 from click.exceptions import Exit
@@ -10,7 +10,9 @@ from click.exceptions import Exit
 from qualibrate_config.qulibrate_types import RawConfigType
 
 
-def print_config(data: Mapping[str, Any], depth: int = 0) -> None:
+def print_config(
+    data: Mapping[str, Any], depth: int = 0, file: Optional[IO[Any]] = None
+) -> None:
     if not len(data.keys()):
         return
     max_key_len = max(map(len, map(str, data.keys())))
@@ -22,12 +24,13 @@ def print_config(data: Mapping[str, Any], depth: int = 0) -> None:
             os.linesep.join(
                 f"{' ' * 4 * depth}{f'{k} :':<{max_key_len + 3}} {v}"
                 for k, v in non_mapping_items
-            )
+            ),
+            file=file,
         )
     mappings = filter(lambda x: isinstance(x[1], Mapping), data.items())
     for mapping_k, mapping_v in mappings:
-        click.echo(f"{' ' * 4 * depth}{mapping_k} :")
-        print_config(mapping_v, depth + 1)
+        click.echo(f"{' ' * 4 * depth}{mapping_k} :", file=file)
+        print_config(mapping_v, depth + 1, file=file)
 
 
 def print_and_confirm(

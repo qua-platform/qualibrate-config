@@ -1,66 +1,29 @@
-import sys
-from pathlib import Path
-from typing import Callable, Optional, TypeVar
+import functools
+import warnings
 
-import tomli_w
+from qualibrate_config.cli.utils import deprecated_alias
+from qualibrate_config.core import content as _core_content
 
-from qualibrate_config.cli.utils.approve import print_and_confirm
-from qualibrate_config.file import get_config_file
-from qualibrate_config.models import BaseConfig
-from qualibrate_config.qulibrate_types import RawConfigType
-from qualibrate_config.vars import (
-    DEFAULT_CONFIG_FILENAME,
+__all__ = _core_content.__all__
+
+deprecated_m = "qualibrate_config.cli.utils.content"
+new_m = "qualibrate_config.core.content"
+
+warnings.warn(
+    (
+        f"Module '{deprecated_m}' is deprecated and will be removed in a "
+        f"future version. Please use '{new_m}' instead."
+    ),
+    DeprecationWarning,
+    stacklevel=2,
 )
 
-if sys.version_info[:2] < (3, 11):
-    import tomli as tomllib
-else:
-    import tomllib
-
-
-ConfigType = TypeVar("ConfigType", bound=BaseConfig)
-
-
-def get_config_file_content(config_path: Path) -> tuple[RawConfigType, Path]:
-    """Returns config and path to file"""
-    config_file = get_config_file(
-        config_path, DEFAULT_CONFIG_FILENAME, raise_not_exists=False
-    )
-    if config_file.is_file():
-        return tomllib.loads(config_file.read_text()), config_path
-    return {}, config_file
-
-
-def simple_write(path: Path, config: RawConfigType) -> None:
-    with path.open("wb") as f_out:
-        tomli_w.dump(config, f_out)
-
-
-def qualibrate_before_write_cb(config: ConfigType) -> None:
-    if config.project in config.storage.location.parts:
-        config.storage.location.mkdir(parents=True, exist_ok=True)
-    else:
-        (config.storage.location / config.project).mkdir(
-            parents=True, exist_ok=True
-        )
-
-
-def write_config(
-    config_file: Path,
-    common_config: RawConfigType,
-    config: ConfigType,
-    config_key: str,
-    before_write_cb: Optional[Callable[[ConfigType], None]] = None,
-    confirm: bool = True,
-    check_generator: bool = False,
-) -> None:
-    exported_data = config.serialize(exclude_none=True)
-    common_config[config_key] = exported_data
-    if confirm or check_generator:
-        print_and_confirm(config_file, common_config, check_generator)
-    if before_write_cb is None:
-        before_write_cb = qualibrate_before_write_cb
-    before_write_cb(config)
-    if not config_file.parent.exists():
-        config_file.parent.mkdir(parents=True)
-    simple_write(config_file, common_config)
+l_deprecated = functools.partial(
+    deprecated_alias, deprecated_module=deprecated_m, new_module=new_m
+)
+# Apply decorator to each re-exported function
+get_config_file_content = l_deprecated(
+    name="get_config_file_content",
+)(_core_content.get_config_file_content)
+simple_write = l_deprecated(name="simple_write")(_core_content.simple_write)
+write_config = l_deprecated(name="write_config")(_core_content.write_config)
