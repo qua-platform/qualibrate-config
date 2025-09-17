@@ -24,8 +24,9 @@ def current_command(
     project = get_active_project(config_path)
     if project is None:
         click.secho(
-            "Can't resolve current config version from file. Please regenerate "
-            "config using `qualibrate-config config` command.",
+            "Can't resolve currently active project. If you have no "
+            "project please create it. Otherwise please regenerate config "
+            "using `qualibrate-config config` command.",
             fg="yellow",
         )
         sys.exit(1)
