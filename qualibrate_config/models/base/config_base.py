@@ -1,11 +1,12 @@
 import importlib
+import types
+from collections.abc import Callable
 from enum import Enum
 from itertools import filterfalse
 from pathlib import Path
 from typing import (
     Annotated,
     Any,
-    Callable,
     ClassVar,
     Optional,
     Union,
@@ -39,7 +40,7 @@ class BaseConfig:
     def __init__(
         self,
         config: RawConfigType,
-        path: Optional[str] = None,
+        path: str | None = None,
         root: Optional["BaseConfig"] = None,
     ) -> None:
         """
@@ -156,7 +157,7 @@ class BaseConfig:
         origin = get_origin(expected_type) or expected_type
         args = get_args(expected_type)
 
-        if origin is Union:
+        if origin is types.UnionType:
             # Handle Union types, including Optional (Union[..., None])
             if type(None) in args and value is None:
                 return value
@@ -204,7 +205,7 @@ class BaseConfig:
                 for attr, annot in class_annotations.items():
                     if attr not in type_hints:
                         raise AttributeError("Unknown attribute")
-                    if get_origin(annot) is not Annotated:
+                    if get_origin(annot) is not Annotated:  # type: ignore[comparison-overlap]
                         type_hints[attr] = (type_hints[attr], None)
                         continue
                     args = get_args(annot)
@@ -267,7 +268,7 @@ class BaseConfig:
             raw_dict = self._get_root()._raw_dict
             return resolve_single_item(raw_dict, value)
         annotation_with_default = annotations[name]
-        default: Optional[DefaultConfigValue] = None
+        default: DefaultConfigValue | None = None
         if isinstance(annotation_with_default, tuple):
             annotation, default = annotation_with_default
         else:

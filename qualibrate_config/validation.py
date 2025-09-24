@@ -1,7 +1,6 @@
 from pathlib import Path
 from typing import (
     Any,
-    Optional,
     TypeVar,
 )
 
@@ -141,7 +140,7 @@ def validate_version_and_migrate_if_needed(
 
 def get_config_solved_references_or_print_error(
     config_path: Path,
-) -> Optional[RawConfigType]:
+) -> RawConfigType | None:
     try:
         return read_config_file(config_path, solve_references=True)
     except ValueError as ex:
@@ -153,8 +152,8 @@ def get_config_solved_references_or_print_error(
 def get_config_model_or_print_error(
     config: RawConfigType,
     model_type: type[T],
-    config_key: Optional[str],
-) -> Optional[T]:
+    config_key: str | None,
+) -> T | None:
     try:
         return model_type(config)
     except ValidationError as ex:

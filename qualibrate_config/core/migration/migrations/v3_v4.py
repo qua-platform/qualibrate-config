@@ -1,7 +1,6 @@
 from copy import deepcopy
 from importlib.util import find_spec
 from pathlib import Path
-from typing import Optional
 
 from qualibrate_config.core.migration.migrations.base import MigrateBase
 from qualibrate_config.qulibrate_types import RawConfigType
@@ -17,7 +16,7 @@ class Migrate(MigrateBase):
         qualibrate = data.pop("qualibrate")
         assert qualibrate.pop("version") == Migrate.to_version
         qualibrate["version"] = Migrate.from_version
-        app: Optional[RawConfigType] = qualibrate.get("app", None)
+        app: RawConfigType | None = qualibrate.get("app", None)
         if app is None:
             return {"qualibrate": qualibrate, **data}
         static_files = app.get("static_site_files")
@@ -39,7 +38,7 @@ class Migrate(MigrateBase):
         version = new_qualibrate.pop("version")
         assert version == Migrate.from_version
         new_qualibrate["version"] = Migrate.to_version
-        app: Optional[RawConfigType] = new_qualibrate.get("app", None)
+        app: RawConfigType | None = new_qualibrate.get("app", None)
 
         if app is None:
             return {"qualibrate": new_qualibrate, **data}

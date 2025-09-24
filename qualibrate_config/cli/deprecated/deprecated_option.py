@@ -1,4 +1,4 @@
-from typing import Any, Optional
+from typing import Any
 
 import click
 
@@ -9,8 +9,8 @@ class DeprecatedOption(click.Option):
     def __init__(
         self,
         *args: Any,
-        preferred: Optional[str] = None,
-        deprecated: Optional[tuple[str]] = None,
+        preferred: str | None = None,
+        deprecated: tuple[str] | None = None,
         **kwargs: Any,
     ):
         self.__deprecated = deprecated or ()

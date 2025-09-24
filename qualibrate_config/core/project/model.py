@@ -28,7 +28,7 @@ class Project(BaseModel):
             updates_str = "config overrides:\n" + updates_io.getvalue()
         else:
             updates_str = "config overrides: None"
-        return f"\n{' '*4}".join(
+        return f"\n{' ' * 4}".join(
             [
                 f"Project: {self.name}",
                 *[f"{k}: {v}" for k, v in d.items()],

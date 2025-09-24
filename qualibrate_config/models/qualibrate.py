@@ -1,5 +1,4 @@
 from pathlib import Path
-from typing import Optional
 
 from qualibrate_config.models.base.config_base import BaseConfig
 from qualibrate_config.models.calibration_library import (
@@ -20,14 +19,14 @@ __all__ = ["QualibrateConfig", "QualibrateTopLevelConfig"]
 class QualibrateConfig(BaseConfig):
     version: int = 5
     project: str = "init_project"
-    password: Optional[str] = None
-    log_folder: Optional[Path] = None
+    password: str | None = None
+    log_folder: Path | None = None
 
     storage: StorageConfig
-    app: Optional[QualibrateAppConfig] = None
-    runner: Optional[QualibrateRunnerRemoteServiceConfig] = None
-    composite: Optional[QualibrateCompositeConfig] = None
-    calibration_library: Optional[CalibrationLibraryConfig] = None
+    app: QualibrateAppConfig | None = None
+    runner: QualibrateRunnerRemoteServiceConfig | None = None
+    composite: QualibrateCompositeConfig | None = None
+    calibration_library: CalibrationLibraryConfig | None = None
 
 
 class QualibrateTopLevelConfig(BaseConfig):

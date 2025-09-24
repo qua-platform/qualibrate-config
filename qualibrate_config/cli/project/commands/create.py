@@ -1,6 +1,5 @@
 import sys
 from pathlib import Path
-from typing import Optional
 
 import click
 
@@ -52,9 +51,9 @@ def create_command(
     ctx: click.Context,
     name: str,
     config_path: Path,
-    storage_location: Optional[Path],
-    calibration_library_folder: Optional[Path],
-    quam_state_path: Optional[Path],
+    storage_location: Path | None,
+    calibration_library_folder: Path | None,
+    quam_state_path: Path | None,
 ) -> None:
     try:
         create_project(

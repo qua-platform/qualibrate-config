@@ -2,7 +2,7 @@ import os
 from collections.abc import Mapping
 from itertools import filterfalse
 from pathlib import Path
-from typing import IO, Any, Optional
+from typing import IO, Any
 
 import click
 from click.exceptions import Exit
@@ -11,7 +11,7 @@ from qualibrate_config.qulibrate_types import RawConfigType
 
 
 def print_config(
-    data: Mapping[str, Any], depth: int = 0, file: Optional[IO[Any]] = None
+    data: Mapping[str, Any], depth: int = 0, file: IO[Any] | None = None
 ) -> None:
     if not len(data.keys()):
         return

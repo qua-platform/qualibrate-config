@@ -1,7 +1,8 @@
 import inspect
 import sys
+from collections.abc import Callable
 from pathlib import Path
-from typing import Callable, Optional, TypeVar, Union, cast, overload
+from typing import TypeVar, cast, overload
 
 import tomli_w
 
@@ -28,10 +29,9 @@ __all__ = [
 
 ConfigType = TypeVar("ConfigType", bound=BaseConfig)
 # Non-generic callback alias to avoid "Missing type parameters" errors
-Callback = Union[
-    Callable[[BaseConfig], None],
-    Callable[[BaseConfig, Optional[Path]], None],
-]
+Callback = (
+    Callable[[BaseConfig], None] | Callable[[BaseConfig, Path | None], None]
+)
 
 
 def get_config_file_content(config_path: Path) -> tuple[RawConfigType, Path]:
@@ -52,7 +52,7 @@ def simple_write(path: Path, config: RawConfigType) -> None:
 
 def qualibrate_after_write_cb(
     config: BaseConfig,
-    config_file: Optional[Path] = None,
+    config_file: Path | None = None,
 ) -> None:
     if config.project in config.storage.location.parts:
         config.storage.location.mkdir(parents=True, exist_ok=True)
@@ -75,12 +75,12 @@ def _call_cb(
 ) -> None: ...
 @overload
 def _call_cb(
-    cb: Callable[[BaseConfig, Optional[Path]], None],
+    cb: Callable[[BaseConfig, Path | None], None],
     config: BaseConfig,
     config_file: Path,
 ) -> None: ...
 def _call_cb(
-    cb: Optional[Callback],
+    cb: Callback | None,
     config: BaseConfig,
     config_file: Path,
 ) -> None:
@@ -92,7 +92,7 @@ def _call_cb(
         cb1 = cast(Callable[[BaseConfig], None], cb)
         cb1(config)
     else:
-        cb2 = cast(Callable[[BaseConfig, Optional[Path]], None], cb)
+        cb2 = cast(Callable[[BaseConfig, Path | None], None], cb)
         cb2(config, config_file)
 
 
@@ -101,8 +101,8 @@ def write_config(
     common_config: RawConfigType,
     config: ConfigType,
     config_key: str,
-    before_write_cb: Optional[Callback] = None,
-    after_write_cb: Optional[Callback] = None,
+    before_write_cb: Callback | None = None,
+    after_write_cb: Callback | None = None,
     confirm: bool = True,
     check_generator: bool = False,
 ) -> None:

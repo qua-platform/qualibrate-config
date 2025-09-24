@@ -1,6 +1,6 @@
-from collections.abc import Sequence
+from collections.abc import Callable, Sequence
 from types import MethodType
-from typing import Any, Callable
+from typing import Any
 
 import click
 from click.core import Option as CoreOption

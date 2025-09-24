@@ -1,5 +1,5 @@
-from collections.abc import Iterable, Mapping
-from typing import Any, Callable, Optional, Protocol, TypeVar, Union, overload
+from collections.abc import Callable, Iterable, Mapping
+from typing import Any, Protocol, TypeVar, overload
 
 from qualibrate_config.qulibrate_types import RawConfigType
 
@@ -36,8 +36,8 @@ def minmax(
     iterable: Iterable[CT],
     *,
     key: None = ...,
-    default: Optional[tuple[R1, R2]] = ...,
-) -> tuple[Union[CT, R1], Union[CT, R2]]: ...
+    default: tuple[R1, R2] | None = ...,
+) -> tuple[CT | R1, CT | R2]: ...
 
 
 @overload
@@ -45,15 +45,15 @@ def minmax(
     iterable: Iterable[T],
     *,
     key: Callable[[T], KT],
-    default: Optional[tuple[R1, R2]] = ...,
-) -> tuple[Union[T, R1], Union[T, R2]]: ...
+    default: tuple[R1, R2] | None = ...,
+) -> tuple[T | R1, T | R2]: ...
 
 
 def minmax(
     iterable: Iterable[Any],
     *,
-    key: Optional[Callable[[Any], Any]] = None,
-    default: Optional[tuple[Any, Any]] = None,
+    key: Callable[[Any], Any] | None = None,
+    default: tuple[Any, Any] | None = None,
 ) -> tuple[Any, Any]:
     it = iter(iterable)
     try:

@@ -1,8 +1,9 @@
 import logging
 import os
+from collections.abc import Callable
 from functools import partial
 from pathlib import Path
-from typing import Callable, Optional, TypeVar
+from typing import TypeVar
 
 import jsonpointer
 
@@ -48,8 +49,8 @@ def get_qualibrate_config_path() -> Path:
 
 def get_config_dict(
     config_path: Path,
-    config_key: Optional[str],
-    config: Optional[RawConfigType] = None,
+    config_key: str | None,
+    config: RawConfigType | None = None,
 ) -> RawConfigType:
     if config is None or config_key is None or config_key not in config:
         config = read_config_file(config_path, solve_references=False)
@@ -62,8 +63,8 @@ def get_config_dict(
 
 def get_config_dict_from_subpath(
     config_path: Path,
-    subpath: Optional[str],
-    config: Optional[RawConfigType] = None,
+    subpath: str | None,
+    config: RawConfigType | None = None,
 ) -> RawConfigType:
     """
     Retrieves a configuration dictionary and optionally resolves a subpath
@@ -89,12 +90,10 @@ def get_config_dict_from_subpath(
 
 def get_config_model(
     config_path: Path,
-    config_key: Optional[str],
+    config_key: str | None,
     config_class: type[ConfigClass] = QualibrateConfig,  # type: ignore
-    config: Optional[RawConfigType] = None,
-    raw_config_validators: Optional[
-        list[Callable[[RawConfigType], None]]
-    ] = None,
+    config: RawConfigType | None = None,
+    raw_config_validators: list[Callable[[RawConfigType], None]] | None = None,
 ) -> ConfigClass:
     """Retrieve the configuration settings.
 
@@ -125,8 +124,8 @@ def get_config_model(
 
 
 def get_qualibrate_config(
-    config_path: Optional[Path] = None,
-    config: Optional[RawConfigType] = None,
+    config_path: Path | None = None,
+    config: RawConfigType | None = None,
     auto_migrate: bool = True,
 ) -> QualibrateConfig:
     """Retrieve the Qualibrate configuration.
