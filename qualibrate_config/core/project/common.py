@@ -1,6 +1,6 @@
 import sys
 from pathlib import Path
-from typing import Optional, cast
+from typing import cast
 
 from qualibrate_config.core.project.path import get_project_config_path
 from qualibrate_config.qulibrate_types import RawConfigType
@@ -14,9 +14,9 @@ else:
     import tomllib
 
 
-def get_project_from_common_config(config: RawConfigType) -> Optional[str]:
+def get_project_from_common_config(config: RawConfigType) -> str | None:
     return cast(
-        Optional[str], config.get(QUALIBRATE_CONFIG_KEY, {}).get("project")
+        str | None, config.get(QUALIBRATE_CONFIG_KEY, {}).get("project")
     )
 
 

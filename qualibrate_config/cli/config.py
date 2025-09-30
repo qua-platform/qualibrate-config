@@ -1,6 +1,5 @@
 from copy import deepcopy
 from pathlib import Path
-from typing import Optional
 
 import click
 from click.exceptions import Exit
@@ -218,7 +217,7 @@ def config_command(
     auto_accept: bool,
     project: str,
     log_folder: Path,
-    password: Optional[str],
+    password: str | None,
     storage_type: StorageType,
     storage_location: Path,
     calibration_library_resolver: str,
@@ -229,7 +228,7 @@ def config_command(
     spawn_app: bool,
     app_static_site_files: Path,
     spawn_qua_dashboards: bool,
-    quam_state_path: Optional[Path],
+    quam_state_path: Path | None,
     check_generator: bool,
 ) -> None:
     common_config, config_file = get_config_file_content(config_path)
@@ -265,7 +264,7 @@ def config_command(
 
 
 def _temporary_fill_quam_state_path(
-    common_config: RawConfigType, state_path: Optional[Path]
+    common_config: RawConfigType, state_path: Path | None
 ) -> RawConfigType:
     quam = common_config.setdefault(QUAM_CONFIG_KEY, {})
     active_machine = common_config.get("active_machine", {})

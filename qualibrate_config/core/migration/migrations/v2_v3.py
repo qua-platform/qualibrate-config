@@ -1,6 +1,5 @@
 from copy import deepcopy
 from pathlib import Path
-from typing import Optional
 
 from qualibrate_config.core.migration.migrations.base import MigrateBase
 from qualibrate_config.qulibrate_types import RawConfigType
@@ -17,7 +16,7 @@ class Migrate(MigrateBase):
         assert qualibrate.pop("version") == Migrate.to_version
         qualibrate["version"] = Migrate.from_version
 
-        composite: Optional[RawConfigType] = qualibrate.get("composite", None)
+        composite: RawConfigType | None = qualibrate.get("composite", None)
         if composite:
             composite.pop("qua_dashboards", None)
 

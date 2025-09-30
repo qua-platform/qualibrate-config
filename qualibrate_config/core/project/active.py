@@ -1,12 +1,11 @@
 from pathlib import Path
-from typing import Optional
 
 from qualibrate_config.core.content import get_config_file_content
 from qualibrate_config.core.project.common import get_project_from_common_config
 from qualibrate_config.core.project.path import get_project_config_path
 
 
-def get_active_project(config_path: Path) -> Optional[str]:
+def get_active_project(config_path: Path) -> str | None:
     common_config, config_file = get_config_file_content(config_path)
     project_name = get_project_from_common_config(common_config)
     if project_name is None:

@@ -1,7 +1,7 @@
 from collections import defaultdict
 from collections.abc import Mapping, Sequence
 from queue import Queue
-from typing import Any, Optional, cast
+from typing import Any, cast
 
 import jsonpatch
 import jsonpointer
@@ -73,7 +73,7 @@ def find_references_from_base(
 
 
 def find_all_references(
-    document: Mapping[str, Any], current_path: Optional[list[str]] = None
+    document: Mapping[str, Any], current_path: list[str] | None = None
 ) -> Sequence[Reference]:
     if current_path is None:
         current_path = []
@@ -89,7 +89,7 @@ def find_all_references(
 
 def check_cycles_in_references(
     references: Mapping[str, Sequence[str]],
-) -> tuple[bool, Optional[Sequence[str]]]:
+) -> tuple[bool, Sequence[str] | None]:
     """Return True if the references has a cycle.
 
     >>> check_cycles_in_references({"a": ("b",), "b": ("c",), "c": ("a",)})
@@ -191,8 +191,8 @@ def _resolve_references(
         references, key=lambda ref: ref.index_start, reverse=True
     ):
         config_value = (
-            f"{config_value[:ref.index_start]}"
-            f"{ref.value}{config_value[ref.index_end + 1:]}"
+            f"{config_value[: ref.index_start]}"
+            f"{ref.value}{config_value[ref.index_end + 1 :]}"
         )
     config_item.value = config_value
     config_item.solved = True

@@ -1,12 +1,13 @@
+from collections.abc import Callable
 from functools import cached_property
-from typing import Any, Callable, Optional
+from typing import Any
 
 
 class DefaultConfigValue:
     def __init__(
         self,
         value: Any = None,
-        factory: Optional[Callable[[], Any]] = None,
+        factory: Callable[[], Any] | None = None,
     ):
         if value and factory:
             raise ValueError("Cannot set both factory and value")

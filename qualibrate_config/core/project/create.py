@@ -2,7 +2,7 @@ import shutil
 from collections.abc import Iterable, Mapping
 from copy import deepcopy
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any
 
 import jsonpatch
 import tomli_w
@@ -40,7 +40,7 @@ def jsonpatch_to_dict(patch: jsonpatch.JsonPatch) -> dict[str, Any]:
 
 
 def _fill_path(
-    config: dict[str, Any], path: Iterable[str], key: str, value: Optional[Path]
+    config: dict[str, Any], path: Iterable[str], key: str, value: Path | None
 ) -> None:
     if value is None:
         return
@@ -51,7 +51,7 @@ def _fill_path(
 
 
 def fill_project_quam_state_path(
-    common_config: dict[str, Any], quam_state_path: Optional[Path]
+    common_config: dict[str, Any], quam_state_path: Path | None
 ) -> None:
     _fill_path(
         common_config,
@@ -62,7 +62,7 @@ def fill_project_quam_state_path(
 
 
 def fill_project_storage_location(
-    common_config: dict[str, Any], storage_location: Optional[Path]
+    common_config: dict[str, Any], storage_location: Path | None
 ) -> None:
     _fill_path(
         common_config,
@@ -73,7 +73,7 @@ def fill_project_storage_location(
 
 
 def fill_project_calibration_library_folder(
-    common_config: dict[str, Any], calibration_library_folder: Optional[Path]
+    common_config: dict[str, Any], calibration_library_folder: Path | None
 ) -> None:
     _fill_path(
         common_config,
@@ -84,8 +84,8 @@ def fill_project_calibration_library_folder(
 
 
 def after_create_project(
-    storage_location: Optional[Path],
-    quam_state_path: Optional[Path],
+    storage_location: Path | None,
+    quam_state_path: Path | None,
 ) -> None:
     if storage_location:
         storage_location.mkdir(parents=True, exist_ok=True)
@@ -96,7 +96,7 @@ def after_create_project(
 def create_project_config_file(
     qualibrate_path: Path,
     project_name: str,
-    config_overrides: Optional[Mapping[str, Any]] = None,
+    config_overrides: Mapping[str, Any] | None = None,
 ) -> None:
     config_filepath = get_project_config_path(qualibrate_path, project_name)
     config_filepath.parent.mkdir(parents=True, exist_ok=True)
@@ -110,8 +110,8 @@ def create_project_config_file(
 def rollback_project_creation(
     qualibrate_path: Path,
     project_name: str,
-    storage_path: Optional[Path],
-    quam_state_path: Optional[Path],
+    storage_path: Path | None,
+    quam_state_path: Path | None,
 ) -> None:
     project_path = get_project_path(qualibrate_path, project_name)
     for p in (project_path, storage_path, quam_state_path):
@@ -121,10 +121,10 @@ def rollback_project_creation(
 
 def config_for_project_from_context(
     common_config: dict[str, Any],
-    storage_location: Optional[Path],
-    calibration_library_folder: Optional[Path],
-    quam_state_path: Optional[Path],
-    context: Optional[Context],
+    storage_location: Path | None,
+    calibration_library_folder: Path | None,
+    quam_state_path: Path | None,
+    context: Context | None,
 ) -> dict[str, Any]:
     if context is None:
         raise ValueError("Context isn't passed.")
@@ -159,10 +159,10 @@ def config_for_project_from_context(
 
 def config_for_project_from_args(
     common_config: dict[str, Any],
-    storage_location: Optional[Path],
-    calibration_library_folder: Optional[Path],
-    quam_state_path: Optional[Path],
-    context: Optional[Context],
+    storage_location: Path | None,
+    calibration_library_folder: Path | None,
+    quam_state_path: Path | None,
+    context: Context | None,
 ) -> dict[str, Any]:
     if context is not None:
         raise ValueError("Context is passed.")
@@ -177,10 +177,10 @@ def config_for_project_from_args(
 def create_project(
     config_path: Path,
     name: str,
-    storage_location: Optional[Path],
-    calibration_library_folder: Optional[Path],
-    quam_state_path: Optional[Path],
-    ctx: Optional[Context] = None,
+    storage_location: Path | None,
+    calibration_library_folder: Path | None,
+    quam_state_path: Path | None,
+    ctx: Context | None = None,
 ) -> None:
     qualibrate_path = config_path.parent
     try:

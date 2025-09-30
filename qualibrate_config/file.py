@@ -1,6 +1,5 @@
 import sys
 from pathlib import Path
-from typing import Optional, Union
 
 from qualibrate_config.core.project.common import (
     get_project_from_common_config,
@@ -23,7 +22,7 @@ else:
 
 def _get_config_file_from_dir(
     dir_path: Path,
-    default_config_specific_filename: Union[str, Path],
+    default_config_specific_filename: str | Path,
     raise_not_exists: bool = True,
 ) -> Path:
     default_qualibrate = dir_path / default_config_specific_filename
@@ -38,8 +37,8 @@ def _get_config_file_from_dir(
 
 
 def get_config_file(
-    config_path: Optional[Union[str, Path]],
-    default_config_specific_filename: Union[str, Path],
+    config_path: str | Path | None,
+    default_config_specific_filename: str | Path,
     raise_not_exists: bool = True,
 ) -> Path:
     if config_path is None:
@@ -61,7 +60,7 @@ def get_config_file(
 def read_config_file(
     config_file: Path,
     solve_references: bool = True,
-    override_project: Optional[str] = None,
+    override_project: str | None = None,
 ) -> RawConfigType:
     # TODO: second location of tomllib.loads
     with config_file.open("rb") as fin:

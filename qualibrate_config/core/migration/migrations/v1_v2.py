@@ -1,6 +1,5 @@
 from copy import deepcopy
 from pathlib import Path
-from typing import Optional
 
 from qualibrate_config.core.migration.migrations.base import MigrateBase
 from qualibrate_config.qulibrate_types import RawConfigType
@@ -14,7 +13,7 @@ class Migrate(MigrateBase):
     def backward(data: RawConfigType, config_path: Path) -> RawConfigType:
         data = deepcopy(data)
         qualibrate = data.pop("qualibrate")
-        quam: Optional[RawConfigType] = data.pop("quam", None)
+        quam: RawConfigType | None = data.pop("quam", None)
         assert qualibrate.pop("version") == Migrate.to_version
         qualibrate["config_version"] = 1
 
@@ -45,12 +44,12 @@ class Migrate(MigrateBase):
         data = deepcopy(data)
         new_qualibrate = data.pop("qualibrate")
         new_qualibrate.pop("config_version")
-        q_app: Optional[RawConfigType] = data.pop("qualibrate_app", None)
-        q_composite: Optional[RawConfigType] = data.pop(
+        q_app: RawConfigType | None = data.pop("qualibrate_app", None)
+        q_composite: RawConfigType | None = data.pop(
             "qualibrate_composite", None
         )
-        q_runner: Optional[RawConfigType] = data.pop("qualibrate_runner", None)
-        active_machine: Optional[RawConfigType] = data.get("active_machine")
+        q_runner: RawConfigType | None = data.pop("qualibrate_runner", None)
+        active_machine: RawConfigType | None = data.get("active_machine")
         if active_machine is not None and "path" in active_machine:
             data["quam"] = {"state_path": active_machine["path"]}
 

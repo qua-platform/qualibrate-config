@@ -1,4 +1,4 @@
-from typing import Optional, cast
+from typing import cast
 
 import click
 from click.core import ParameterSource
@@ -37,9 +37,9 @@ def get_config_by_args_mapping(
 
 def get_optional_config(
     args_mapping: dict[str, str],
-    from_file: Optional[RawConfigType],
+    from_file: RawConfigType | None,
     ctx: click.Context,
-) -> Optional[RawConfigType]:
+) -> RawConfigType | None:
     return get_config_by_args_mapping(args_mapping, from_file or {}, ctx)
 
 
@@ -54,8 +54,8 @@ def _get_storage_config(
 
 
 def _get_calibration_library_config(
-    ctx: click.Context, from_file: Optional[RawConfigType]
-) -> Optional[RawConfigType]:
+    ctx: click.Context, from_file: RawConfigType | None
+) -> RawConfigType | None:
     args_mapping = {
         "calibration_library_resolver": "resolver",
         "calibration_library_folder": "folder",
@@ -66,7 +66,7 @@ def _get_calibration_library_config(
 
 def _get_app_config(
     ctx: click.Context, from_file: RawConfigType
-) -> Optional[RawConfigType]:
+) -> RawConfigType | None:
     args_mapping = {"app_static_site_files": "static_site_files"}
     # TODO: JsonTimelineDB
     return get_optional_config(args_mapping, from_file, ctx)
@@ -74,14 +74,14 @@ def _get_app_config(
 
 def _get_runner_config(
     ctx: click.Context, from_file: RawConfigType
-) -> Optional[RawConfigType]:
+) -> RawConfigType | None:
     args_mapping = {"runner_address": "address", "runner_timeout": "timeout"}
     return get_optional_config(args_mapping, from_file, ctx)
 
 
 def _get_composite_config(
-    ctx: click.Context, from_file: Optional[RawConfigType]
-) -> Optional[RawConfigType]:
+    ctx: click.Context, from_file: RawConfigType | None
+) -> RawConfigType | None:
     app = get_optional_config(
         {"spawn_app": "spawn"},
         from_file.get("app") if from_file is not None else None,
