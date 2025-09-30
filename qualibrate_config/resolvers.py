@@ -29,26 +29,9 @@ __all__ = [
     "get_config_model",
     "get_qualibrate_config_path",
     "get_qualibrate_config",
-    "set_qualibrate_config_path",
 ]
 
 ConfigClass = TypeVar("ConfigClass", bound=BaseConfig)
-
-
-def set_qualibrate_config_path(
-    path: Path | str,
-    env_name: str = CONFIG_PATH_ENV_NAME,
-    force: bool = False,
-) -> None:
-    """
-    Retrieve the qualibrate configuration file path. If an environment variable
-    for the config path is set, it uses that; otherwise, it defaults to the
-    standard Qualibrate path.
-    """
-    if force:
-        os.environ[env_name] = str(path)
-    else:
-        os.environ.setdefault(env_name, str(path))
 
 
 def get_qualibrate_config_path() -> Path:
