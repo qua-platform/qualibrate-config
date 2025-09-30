@@ -9,7 +9,7 @@ import tomli_w
 from qualibrate_config.core.approve import print_and_confirm
 from qualibrate_config.core.project.path import get_project_path
 from qualibrate_config.file import get_config_file
-from qualibrate_config.models import BaseConfig
+from qualibrate_config.models import BaseConfig, QualibrateConfig
 from qualibrate_config.qulibrate_types import RawConfigType
 from qualibrate_config.vars import DEFAULT_CONFIG_FILENAME
 
@@ -117,6 +117,6 @@ def write_config(
         config_file.parent.mkdir(parents=True)
     simple_write(config_file, common_config)
 
-    if after_write_cb is None:
+    if after_write_cb is None and isinstance(config, QualibrateConfig):
         after_write_cb = qualibrate_after_write_cb
     _call_cb(after_write_cb, config, config_file)

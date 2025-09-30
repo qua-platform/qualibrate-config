@@ -46,7 +46,7 @@ def run_migrations(
         )
         return
     migrated = make_migrations(
-        common_config, config_file, from_version, to_version
+        common_config, from_version, to_version, config_path=config_file
     )
     if to_version == QualibrateConfig.version:
         QualibrateTopLevelConfig(migrated)
