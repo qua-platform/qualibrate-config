@@ -1,5 +1,6 @@
 import importlib
 import types
+import typing
 from collections.abc import Callable
 from enum import Enum
 from itertools import filterfalse
@@ -157,7 +158,7 @@ class BaseConfig:
         origin = get_origin(expected_type) or expected_type
         args = get_args(expected_type)
 
-        if origin is types.UnionType:
+        if origin is types.UnionType or origin is typing.Union:
             # Handle Union types, including Optional (Union[..., None])
             if type(None) in args and value is None:
                 return value
