@@ -11,7 +11,7 @@ from qualibrate_config.core.project.path import get_project_path
 from qualibrate_config.file import get_config_file
 from qualibrate_config.models import BaseConfig, QualibrateConfig
 from qualibrate_config.qulibrate_types import RawConfigType
-from qualibrate_config.vars import DEFAULT_CONFIG_FILENAME
+from qualibrate_config.vars import DEFAULT_CONFIG_FILENAME, QUALIBRATE_PATH
 
 if sys.version_info[:2] < (3, 11):
     import tomli as tomllib  # type: ignore[unused-ignore,import-not-found]
@@ -60,6 +60,14 @@ def qualibrate_after_write_cb(
         (config.storage.location / config.project).mkdir(
             parents=True, exist_ok=True
         )
+    if (
+        config.calibration_library and
+        config.calibration_library.folder.is_relative_to(
+            QUALIBRATE_PATH
+        )
+    ):
+        config.calibration_library.folder.mkdir(parents=True, exist_ok=True)
+
     if config_file is not None:
         project_path = get_project_path(config_file.parent, config.project)
         project_path.mkdir(parents=True, exist_ok=True)
