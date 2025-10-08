@@ -70,7 +70,7 @@ __all__ = ["config_command"]
 @click.option(
     "--project",
     type=str,
-    default="init_project",
+    default="demo_project",
     show_default=True,
     help=(
         "The name of qualibrate app project that will be used for storing runs "

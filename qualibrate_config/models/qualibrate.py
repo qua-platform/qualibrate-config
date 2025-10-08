@@ -18,7 +18,7 @@ __all__ = ["QualibrateConfig", "QualibrateTopLevelConfig"]
 
 class QualibrateConfig(BaseConfig):
     version: int = 5
-    project: str = "init_project"
+    project: str = "demo_project"
     password: str | None = None
     log_folder: Path | None = None
 
