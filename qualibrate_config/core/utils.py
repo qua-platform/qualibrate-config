@@ -10,6 +10,7 @@ def recursive_update_dict(
 ) -> RawConfigType:
     for k, v in updates.items():
         if k not in to_update:
+            to_update[k] = v
             continue
         if isinstance(v, Mapping):
             to_update[k] = recursive_update_dict(to_update.get(k, {}), v)
