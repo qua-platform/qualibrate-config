@@ -1,5 +1,3 @@
-import pytest
-
 from qualibrate_config.core.utils import recursive_update_dict
 
 
@@ -37,17 +35,12 @@ def test_recursive_update_dict_add_new_top_level_section():
 
 
 def test_recursive_update_dict_nested_merge_with_new_keys():
-    """Test recursive merge preserves existing nested values while adding new ones."""
-    base = {
-        "quam": {
-            "version": 3,
-            "serialization": {"include_defaults": True}
-        }
-    }
+    """Test recursive merge preserves existing values while adding new ones."""
+    base = {"quam": {"version": 3, "serialization": {"include_defaults": True}}}
     updates = {
         "quam": {
             "state_path": "/new/path",
-            "serialization": {"other_option": False}
+            "serialization": {"other_option": False},
         }
     }
 
@@ -78,22 +71,15 @@ def test_recursive_update_dict_project_config_use_case():
         "quam": {
             "raise_error_missing_reference": False,
             "version": 3,
-            "serialization": {"include_defaults": True}
+            "serialization": {"include_defaults": True},
         },
-        "qualibrate": {
-            "version": 5,
-            "project": "CS_1"
-        }
+        "qualibrate": {"version": 5, "project": "CS_1"},
     }
 
     # Project config from ~/.qualibrate/projects/CS_1/config.toml
     updates = {
-        "quam": {
-            "state_path": "/path/to/project/quam_state"
-        },
-        "qualibrate": {
-            "storage": {"location": "/project/storage"}
-        }
+        "quam": {"state_path": "/path/to/project/quam_state"},
+        "qualibrate": {"storage": {"location": "/project/storage"}},
     }
 
     result = recursive_update_dict(base, updates)
@@ -132,19 +118,11 @@ def test_recursive_update_dict_non_dict_value_override():
 
 def test_recursive_update_dict_multiple_new_keys_at_different_levels():
     """Test adding new keys at multiple nesting levels."""
-    base = {
-        "level1": {
-            "level2": {
-                "existing": "value"
-            }
-        }
-    }
+    base = {"level1": {"level2": {"existing": "value"}}}
     updates = {
         "level1": {
             "new_at_level2": "value2",
-            "level2": {
-                "new_at_level3": "value3"
-            }
+            "level2": {"new_at_level3": "value3"},
         }
     }
 
