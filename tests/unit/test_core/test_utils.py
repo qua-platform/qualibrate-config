@@ -57,14 +57,12 @@ def test_recursive_update_dict_nested_merge_with_new_keys():
 
 def test_recursive_update_dict_project_config_use_case():
     """
-    Test the real-world use case: project config adding state_path
-    when base config doesn't have it.
+    Test adding new keys to project config when base config doesn't have them.
 
-    This was the bug scenario:
+    This test verifies that when merging configurations:
     - Base config: [quam] has version=3, no state_path
     - Project config: [quam] adds state_path="/project/path"
-    - Expected: state_path should be merged in
-    - Bug (before fix): state_path was skipped
+    - Expected: state_path should be merged in while preserving existing values
     """
     # Base config from ~/.qualibrate/config.toml
     base = {
@@ -91,7 +89,7 @@ def test_recursive_update_dict_project_config_use_case():
     assert result["qualibrate"]["version"] == 5
     assert result["qualibrate"]["project"] == "CS_1"
 
-    # Verify new project-specific values added (this was the bug!)
+    # Verify new project-specific values added
     assert result["quam"]["state_path"] == "/path/to/project/quam_state"
     assert result["qualibrate"]["storage"]["location"] == "/project/storage"
 
