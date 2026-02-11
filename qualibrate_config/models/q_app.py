@@ -12,10 +12,10 @@ __all__ = ["QualibrateAppConfig"]
 
 
 def get_default_static_path() -> Path | None:
-    app_module = find_spec("qualibrate_app")
+    app_module = find_spec("qualibrate.app")
     if app_module is None or app_module.origin is None:
         return None
-    return Path(app_module.origin).resolve().parents[1] / "qualibrate_static"
+    return Path(app_module.origin).resolve().parent / "qualibrate_static"
 
 
 class QualibrateAppConfig(BaseConfig):
