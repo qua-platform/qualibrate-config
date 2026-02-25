@@ -1,5 +1,6 @@
 from pathlib import Path
 
+from qualibrate_config.models.db import DBConfig
 from qualibrate_config.models.base.config_base import BaseConfig
 from qualibrate_config.models.calibration_library import (
     CalibrationLibraryConfig,
@@ -27,6 +28,7 @@ class QualibrateConfig(BaseConfig):
     runner: QualibrateRunnerRemoteServiceConfig | None = None
     composite: QualibrateCompositeConfig | None = None
     calibration_library: CalibrationLibraryConfig | None = None
+    database: DBConfig | None = None
 
 
 class QualibrateTopLevelConfig(BaseConfig):
