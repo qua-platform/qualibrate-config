@@ -8,8 +8,23 @@ def recursive_update_dict(
     to_update: RawConfigType,
     updates: Mapping[str, Any],
 ) -> RawConfigType:
+    """
+    Recursively merge nested dictionaries, updating values and adding new keys.
+
+    Used to merge project-specific config overrides on top of base config.
+    New keys are added, existing nested dicts are merged recursively, and
+    non-dict values are replaced. Modifies ``to_update`` in-place.
+
+    Args:
+        to_update: Base dictionary to update (modified in-place).
+        updates: Dictionary with updates to apply recursively.
+
+    Returns:
+        The updated dictionary (same reference as ``to_update``).
+    """
     for k, v in updates.items():
         if k not in to_update:
+            to_update[k] = v
             continue
         if isinstance(v, Mapping):
             to_update[k] = recursive_update_dict(to_update.get(k, {}), v)
