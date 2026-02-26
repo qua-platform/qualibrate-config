@@ -15,7 +15,11 @@ from qualibrate_config.core.project.path import (
     get_project_config_path,
     get_project_path,
 )
-from qualibrate_config.models import PathSerializer, QualibrateTopLevelConfig, DBConfig
+from qualibrate_config.models import (
+    DBConfig,
+    PathSerializer,
+    QualibrateTopLevelConfig,
+)
 from qualibrate_config.validation import validate_version_and_migrate_if_needed
 from qualibrate_config.vars import (
     QUALIBRATE_CONFIG_KEY,
@@ -158,6 +162,7 @@ def config_for_project_from_context(
     fill_project_database(common_config, database)
     return common_config
 
+
 def fill_project_database(
     common_config: dict[str, Any], database: DBConfig | None
 ) -> None:
@@ -171,6 +176,7 @@ def fill_project_database(
         "username": database.username,
         "password": database.password,
     }
+
 
 def config_for_project_from_args(
     common_config: dict[str, Any],

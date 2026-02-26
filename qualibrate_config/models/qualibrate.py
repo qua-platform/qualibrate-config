@@ -1,11 +1,11 @@
 from pathlib import Path
 
-from qualibrate_config.models.db import DBConfig
 from qualibrate_config.models.base.config_base import BaseConfig
 from qualibrate_config.models.calibration_library import (
     CalibrationLibraryConfig,
 )
 from qualibrate_config.models.composite import QualibrateCompositeConfig
+from qualibrate_config.models.db import DBConfig
 from qualibrate_config.models.q_app import QualibrateAppConfig
 from qualibrate_config.models.remote_services import (
     QualibrateRunnerRemoteServiceConfig,

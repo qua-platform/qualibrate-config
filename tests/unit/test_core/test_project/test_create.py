@@ -202,7 +202,9 @@ def test_config_for_project_from_context_calibration_library_without_resolver(
 
 def test_config_for_project_from_context_raises_if_none():
     with pytest.raises(ValueError):
-        create_m.config_for_project_from_context({}, None, None, None,None, None)
+        create_m.config_for_project_from_context(
+            {}, None, None, None, None, None
+        )
 
 
 def test_config_for_project_from_args_sets_all(paths: Paths):
@@ -221,7 +223,7 @@ def test_config_for_project_from_args_sets_all(paths: Paths):
 
 def test_config_for_project_from_args_raises_on_ctx():
     with pytest.raises(ValueError):
-        create_m.config_for_project_from_args({}, None, None, None,None, "ctx")
+        create_m.config_for_project_from_args({}, None, None, None, None, "ctx")
 
 
 def test_jsonpatch_to_dict_nested_fields():
