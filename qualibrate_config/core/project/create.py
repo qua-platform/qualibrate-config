@@ -15,7 +15,7 @@ from qualibrate_config.core.project.path import (
     get_project_config_path,
     get_project_path,
 )
-from qualibrate_config.models import PathSerializer, QualibrateTopLevelConfig
+from qualibrate_config.models import PathSerializer, QualibrateTopLevelConfig, DBConfig
 from qualibrate_config.validation import validate_version_and_migrate_if_needed
 from qualibrate_config.vars import (
     QUALIBRATE_CONFIG_KEY,
@@ -124,6 +124,7 @@ def config_for_project_from_context(
     storage_location: Path | None,
     calibration_library_folder: Path | None,
     quam_state_path: Path | None,
+    database: DBConfig | None,
     context: Context | None,
 ) -> dict[str, Any]:
     if context is None:
@@ -154,14 +155,29 @@ def config_for_project_from_context(
     qs = QualibrateTopLevelConfig({QUALIBRATE_CONFIG_KEY: q_config})
     common_config.update(qs.serialize())
     fill_project_quam_state_path(common_config, quam_state_path)
+    fill_project_database(common_config, database)
     return common_config
 
+def fill_project_database(
+    common_config: dict[str, Any], database: DBConfig | None
+) -> None:
+    if database is None:
+        return
+    q_config = common_config.setdefault(QUALIBRATE_CONFIG_KEY, {})
+    q_config["database"] = {
+        "host": database.host,
+        "port": database.port,
+        "database": database.database,
+        "username": database.username,
+        "password": database.password,
+    }
 
 def config_for_project_from_args(
     common_config: dict[str, Any],
     storage_location: Path | None,
     calibration_library_folder: Path | None,
     quam_state_path: Path | None,
+    database: DBConfig | None,
     context: Context | None,
 ) -> dict[str, Any]:
     if context is not None:
@@ -171,6 +187,7 @@ def config_for_project_from_args(
         common_config, calibration_library_folder
     )
     fill_project_quam_state_path(common_config, quam_state_path)
+    fill_project_database(common_config, database)
     return common_config
 
 
@@ -180,6 +197,7 @@ def create_project(
     storage_location: Path | None,
     calibration_library_folder: Path | None,
     quam_state_path: Path | None,
+    database: DBConfig | None = None,
     ctx: Context | None = None,
 ) -> None:
     qualibrate_path = config_path.parent
@@ -203,6 +221,7 @@ def create_project(
         storage_location,
         calibration_library_folder,
         quam_state_path,
+        database,
         ctx,
     )
     patches = jsonpatch.make_patch(old_config, common_config)
