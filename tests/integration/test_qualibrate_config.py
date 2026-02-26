@@ -99,7 +99,7 @@ def test_config_with_db():
             "type": "local_storage",
             "location": "/tmp/user_storage/${#/project}",
         },
-        "db": {
+        "database": {
             "host": "localhost",
             "port": 5432,
             "database": "qualibrate_db",
@@ -109,12 +109,12 @@ def test_config_with_db():
     }
     conf = QualibrateConfig(conf_dict)
 
-    assert isinstance(conf.db, DBConfig)
-    assert conf.db.host == "localhost"
-    assert conf.db.port == 5432
-    assert conf.db.database == "qualibrate_db"
-    assert conf.db.username == "admin"
-    assert conf.db.password == "secret"
+    assert isinstance(conf.database, DBConfig)
+    assert conf.database.host == "localhost"
+    assert conf.database.port == 5432
+    assert conf.database.database == "qualibrate_db"
+    assert conf.database.username == "admin"
+    assert conf.database.password == "secret"
 
 
 def test_config_without_db():
@@ -128,7 +128,7 @@ def test_config_without_db():
     }
     conf = QualibrateConfig(conf_dict)
 
-    assert conf.db is None
+    assert conf.database is None
 
 
 def test_config_with_db_references():
@@ -139,7 +139,7 @@ def test_config_with_db_references():
             "type": "local_storage",
             "location": "/tmp/user_storage/${#/project}",
         },
-        "db": {
+        "database": {
             "host": "localhost",
             "port": 5432,
             "database": "${#/project}_db",  # Reference to project name
@@ -147,5 +147,5 @@ def test_config_with_db_references():
     }
     conf = QualibrateConfig(conf_dict)
 
-    assert isinstance(conf.db, DBConfig)
-    assert conf.db.database == "ref_project_db"
+    assert isinstance(conf.database, DBConfig)
+    assert conf.database.database == "ref_project_db"
