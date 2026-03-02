@@ -30,10 +30,14 @@ from qualibrate_config.vars import (
 
 def jsonpatch_to_dict(patch: jsonpatch.JsonPatch) -> dict[str, Any]:
     d: dict[str, Any] = dict()
-    replace_ops = filter(
-        lambda op: isinstance(op, jsonpatch.ReplaceOperation), patch._ops
+    # Allow both REPLACE and ADD operations to support optional features
+    # REPLACE: modifying existing values (e.g., changing storage location)
+    # ADD: adding new optional fields (e.g., database, calibration_library)
+    relevant_ops = filter(
+        lambda op: isinstance(op, (jsonpatch.ReplaceOperation, jsonpatch.AddOperation)),
+        patch._ops
     )
-    for op in replace_ops:
+    for op in relevant_ops:
         path_ = d
         for part in op.pointer.parts[:-1]:
             if part not in path_:
