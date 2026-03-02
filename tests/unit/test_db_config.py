@@ -17,6 +17,7 @@ def test_db_config_minimal():
     assert db_config.database == "test_db"
     assert db_config.username is None
     assert db_config.password is None
+    assert db_config.is_connected is False
 
 
 def test_db_config_full():
@@ -27,6 +28,7 @@ def test_db_config_full():
         "database": "production_db",
         "username": "admin",
         "password": "secret123",
+        "is_connected": True,
     }
     db_config = DBConfig(config_dict)
 
@@ -35,6 +37,7 @@ def test_db_config_full():
     assert db_config.database == "production_db"
     assert db_config.username == "admin"
     assert db_config.password == "secret123"
+    assert db_config.is_connected is True
 
 
 def test_db_config_missing_required_field():
@@ -75,6 +78,7 @@ def test_db_config_serialization():
         "port": 5432,
         "database": "test_db",
         "username": "user",
+        "is_connected": False,
     }
 
 
@@ -95,4 +99,5 @@ def test_db_config_serialization_exclude_none():
         "host": "localhost",
         "port": 5432,
         "database": "test_db",
+        "is_connected": False,
     }

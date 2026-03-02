@@ -9,3 +9,4 @@ class DBConfig(BaseConfig):
     database: str
     username: str | None = None
     password: str | None = None
+    is_connected: bool = False

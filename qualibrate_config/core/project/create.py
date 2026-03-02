@@ -175,6 +175,7 @@ def fill_project_database(
         "database": database.database,
         "username": database.username,
         "password": database.password,
+        "is_connected": database.is_connected,
     }
 
 
