@@ -9,10 +9,15 @@ def recursive_update_dict(
     updates: Mapping[str, Any],
 ) -> RawConfigType:
     for k, v in updates.items():
-        # Allow adding new keys from project config (e.g., optional features like database)
+        # Allow adding new keys from project config
+        # (e.g., optional features like database)
         # If key exists in base and both are dicts, merge recursively
         # Otherwise, add or override the value
-        if isinstance(v, Mapping) and k in to_update and isinstance(to_update.get(k), Mapping):
+        if (
+            isinstance(v, Mapping)
+            and k in to_update
+            and isinstance(to_update.get(k), Mapping)
+        ):
             to_update[k] = recursive_update_dict(to_update[k], v)
         else:
             to_update[k] = v

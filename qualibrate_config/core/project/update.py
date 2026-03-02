@@ -6,12 +6,13 @@ from qualibrate_config.core.project.create import (
     create_project_config_file,
     fill_project_calibration_library_folder,
     fill_project_database,
+    fill_project_database_state,
     fill_project_quam_state_path,
     fill_project_storage_location,
     rollback_project_creation,
 )
 from qualibrate_config.core.project.path import get_project_config_path
-from qualibrate_config.models import DBConfig
+from qualibrate_config.models import DatabaseStateConfig, DBConfig
 
 
 def update_project(
@@ -21,6 +22,7 @@ def update_project(
     calibration_library_folder: Path | None = None,
     quam_state_path: Path | None = None,
     database: DBConfig | None = None,
+    database_state: DatabaseStateConfig | None = None,
 ) -> None:
     qualibrate_path = config_path.parent
     project_config_path = get_project_config_path(qualibrate_path, name)
@@ -36,6 +38,7 @@ def update_project(
     )
     fill_project_quam_state_path(existing_config, quam_state_path)
     fill_project_database(existing_config, database)
+    fill_project_database_state(existing_config, database_state)
     try:
         create_project_config_file(qualibrate_path, name, existing_config)
         after_create_project(storage_location, quam_state_path)

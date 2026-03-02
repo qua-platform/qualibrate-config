@@ -1,6 +1,6 @@
 from qualibrate_config.models.base.config_base import BaseConfig
 
-__all__ = ["DBConfig"]
+__all__ = ["DBConfig", "DatabaseStateConfig"]
 
 
 class DBConfig(BaseConfig):
@@ -9,4 +9,7 @@ class DBConfig(BaseConfig):
     database: str
     username: str | None = None
     password: str | None = None
+
+
+class DatabaseStateConfig(BaseConfig):
     is_connected: bool = False
