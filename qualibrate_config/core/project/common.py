@@ -28,4 +28,5 @@ def read_project_config_file(
     if not project_config.is_file():
         return {}
     with project_config.open("rb") as fin:
-        return tomllib.load(fin)
+        result: RawConfigType = tomllib.load(fin)
+        return result

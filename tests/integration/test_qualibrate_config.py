@@ -3,6 +3,7 @@ from pathlib import Path
 import pytest
 
 from qualibrate_config.models import (
+    DBConfig,
     QuaDashboardSubServiceConfig,
     QualibrateAppConfig,
     QualibrateAppSubServiceConfig,
@@ -88,3 +89,63 @@ def test_full_model():
     assert conf.calibration_library.folder == Path("/tmp/calibrations")
     with pytest.raises(ImportError):
         conf.calibration_library.resolver  # noqa: B018
+
+
+def test_config_with_db():
+    """Test QualibrateConfig with DB configuration."""
+    conf_dict = {
+        "project": "db_project",
+        "storage": {
+            "type": "local_storage",
+            "location": "/tmp/user_storage/${#/project}",
+        },
+        "database": {
+            "host": "localhost",
+            "port": 5432,
+            "database": "qualibrate_db",
+            "username": "admin",
+            "password": "secret",
+        },
+    }
+    conf = QualibrateConfig(conf_dict)
+
+    assert isinstance(conf.database, DBConfig)
+    assert conf.database.host == "localhost"
+    assert conf.database.port == 5432
+    assert conf.database.database == "qualibrate_db"
+    assert conf.database.username == "admin"
+    assert conf.database.password == "secret"
+
+
+def test_config_without_db():
+    """Test QualibrateConfig works without DB (backward compatibility)."""
+    conf_dict = {
+        "project": "no_db_project",
+        "storage": {
+            "type": "local_storage",
+            "location": "/tmp/user_storage/${#/project}",
+        },
+    }
+    conf = QualibrateConfig(conf_dict)
+
+    assert conf.database is None
+
+
+def test_config_with_db_references():
+    """Test DB config can use references to other config values."""
+    conf_dict = {
+        "project": "ref_project",
+        "storage": {
+            "type": "local_storage",
+            "location": "/tmp/user_storage/${#/project}",
+        },
+        "database": {
+            "host": "localhost",
+            "port": 5432,
+            "database": "${#/project}_db",  # Reference to project name
+        },
+    }
+    conf = QualibrateConfig(conf_dict)
+
+    assert isinstance(conf.database, DBConfig)
+    assert conf.database.database == "ref_project_db"

@@ -62,7 +62,7 @@ def create_command(
             storage_location,
             calibration_library_folder,
             quam_state_path,
-            ctx,
+            ctx=ctx,
         )
     except ValueError as e:
         click.secho(str(e), fg="red")

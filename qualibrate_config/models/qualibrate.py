@@ -5,6 +5,7 @@ from qualibrate_config.models.calibration_library import (
     CalibrationLibraryConfig,
 )
 from qualibrate_config.models.composite import QualibrateCompositeConfig
+from qualibrate_config.models.db import DatabaseStateConfig, DBConfig
 from qualibrate_config.models.q_app import QualibrateAppConfig
 from qualibrate_config.models.remote_services import (
     QualibrateRunnerRemoteServiceConfig,
@@ -27,6 +28,8 @@ class QualibrateConfig(BaseConfig):
     runner: QualibrateRunnerRemoteServiceConfig | None = None
     composite: QualibrateCompositeConfig | None = None
     calibration_library: CalibrationLibraryConfig | None = None
+    database: DBConfig | None = None
+    database_state: DatabaseStateConfig | None = None
 
 
 class QualibrateTopLevelConfig(BaseConfig):
