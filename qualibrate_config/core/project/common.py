@@ -28,4 +28,4 @@ def read_project_config_file(
     if not project_config.is_file():
         return {}
     with project_config.open("rb") as fin:
-        return cast(RawConfigType, tomllib.load(fin))
+        return tomllib.load(fin)  # type: ignore[no-any-return]
