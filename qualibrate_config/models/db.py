@@ -9,6 +9,7 @@ class DBConfig(BaseConfig):
     database: str
     username: str | None = None
     password: str | None = None
+    table_name: str = "machine_state"
 
 
 class DatabaseStateConfig(BaseConfig):
