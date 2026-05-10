@@ -24,7 +24,6 @@ def rename_project(
         raise ValueError(f"Project '{new_name}' already exists.")
 
     try:
-        # Only if everything succeeds, atomically replace the original file
         project_path.rename(new_project_path)
         logger.info(
             f"Successfully renamed project '{old_name}' to '{new_name}'"
