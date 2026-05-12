@@ -43,9 +43,7 @@ def _created_at_from_storage(
     )
     if first_create_p is None:
         return _dt_from_ts(_stat_ctime(storage_stat))
-    return _dt_from_ts(
-        min(_stat_ctime(storage_stat), _file_stat_ctime(first_create_p))
-    )
+    return _dt_from_ts(min(_stat_ctime(storage_stat), _file_stat_ctime(first_create_p)))
 
 
 def _last_modified_at_from_storage(
@@ -58,9 +56,7 @@ def _last_modified_at_from_storage(
     )
     if first_create_p is None:
         return _dt_from_ts(storage_stat.st_mtime)
-    return _dt_from_ts(
-        max(storage_stat.st_mtime, _file_stat_mtime(first_create_p))
-    )
+    return _dt_from_ts(max(storage_stat.st_mtime, _file_stat_mtime(first_create_p)))
 
 
 def _storage_stat(
@@ -72,9 +68,7 @@ def _storage_stat(
     )
     storage_stat = storage_path.stat()
     created_at = _created_at_from_storage(storage_path, storage_stat)
-    last_modified_at = _last_modified_at_from_storage(
-        storage_path, storage_stat
-    )
+    last_modified_at = _last_modified_at_from_storage(storage_path, storage_stat)
     return nodes_number, created_at, last_modified_at
 
 
@@ -86,46 +80,40 @@ def _project_stat_dir(
 
 
 def project_stat(
-    qualibrate_path: Path, project: str, config_path: Path
+    qualibrate_path: Path,
+    project: str,
+    config_path: Path,
+    with_config: bool = False,
 ) -> Project:
     project_path = get_project_path(qualibrate_path, project)
 
     config_dict = read_config_file(config_path, override_project=project)
     project_config = read_project_config_file(config_path, project)
     storage_location = (
-        config_dict.get(QUALIBRATE_CONFIG_KEY, {})
-        .get("storage", {})
-        .get("location")
+        config_dict.get(QUALIBRATE_CONFIG_KEY, {}).get("storage", {}).get("location")
     )
     if storage_location:
         storage_path = Path(storage_location)
         if storage_path.is_dir():
-            nodes_number, created_at, last_modified_at = _storage_stat(
-                storage_path
-            )
+            nodes_number, created_at, last_modified_at = _storage_stat(storage_path)
         else:
-            nodes_number, created_at, last_modified_at = _project_stat_dir(
-                project_path
-            )
+            nodes_number, created_at, last_modified_at = _project_stat_dir(project_path)
     else:
-        nodes_number, created_at, last_modified_at = _project_stat_dir(
-            project_path
-        )
+        nodes_number, created_at, last_modified_at = _project_stat_dir(project_path)
     return Project(
         name=project,
         nodes_number=nodes_number,
         created_at=created_at.astimezone(),
         last_modified_at=last_modified_at.astimezone(),
         updates=project_config,
+        config=config_dict if with_config else None,
     )
 
 
 def list_projects(qualibrate_path: Path) -> list[str]:
     projects_path = get_projects_path(qualibrate_path)
     if not projects_path.is_dir():
-        raise NotADirectoryError(
-            f"Projects path '{projects_path}' is not a directory"
-        )
+        raise NotADirectoryError(f"Projects path '{projects_path}' is not a directory")
     return list(
         map(
             lambda p: p.name,
@@ -139,7 +127,7 @@ def verbose_list_projects(
 ) -> dict[str, Project]:
     qualibrate_path = config_path.parent
     return {
-        p_name: project_stat(qualibrate_path, p_name, config_path)
+        p_name: project_stat(qualibrate_path, p_name, config_path, with_config=True)
         for p_name in list_projects(qualibrate_path)
     }
 
