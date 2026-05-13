@@ -219,6 +219,65 @@ def test_project_stat_with_no_storage_defined(mocker, tmp_path):
     assert isinstance(project_obj.last_modified_at, datetime)
 
 
+def test_project_stat_with_config_includes_full_config(mocker, tmp_path):
+    project = "proj"
+    project_path = tmp_path / project
+    project_path.mkdir()
+    config_path = tmp_path / "config.toml"
+    config_dict = {"qualibrate": {"project": project, "storage": {}}}
+    project_config = {"qualibrate": {"project": project}}
+    now = datetime.now().astimezone()
+
+    mocker.patch(
+        "qualibrate_config.core.project.p_list.get_project_path",
+        return_value=project_path,
+    )
+    mocker.patch(
+        "qualibrate_config.core.project.p_list.read_config_file",
+        return_value=config_dict,
+    )
+    mocker.patch(
+        "qualibrate_config.core.project.p_list.read_project_config_file",
+        return_value=project_config,
+    )
+    mocker.patch(
+        "qualibrate_config.core.project.p_list._project_stat_dir",
+        return_value=(0, now, now),
+    )
+
+    project_obj = p_list.project_stat(
+        tmp_path, project, config_path, with_config=True
+    )
+
+    assert project_obj.config == config_dict
+    assert project_obj.updates == project_config
+
+
+def test_verbose_list_projects_requests_config(mocker, tmp_path):
+    config_path = tmp_path / "config.toml"
+    now = datetime.now().astimezone()
+
+    mocker.patch(
+        "qualibrate_config.core.project.p_list.list_projects",
+        return_value=["p1"],
+    )
+    project_stat = mocker.patch(
+        "qualibrate_config.core.project.p_list.project_stat",
+        return_value=p_list.Project(
+            name="p1",
+            nodes_number=1,
+            created_at=now,
+            last_modified_at=now,
+        ),
+    )
+
+    p_list.verbose_list_projects(config_path)
+
+    project_stat.assert_called_once_with(
+        config_path.parent, "p1", config_path, with_config=True
+    )
+
+
 def test_list_projects_not_exists(mocker, tmp_path):
     projects = tmp_path / "p1"
     mock_path = mocker.patch(
