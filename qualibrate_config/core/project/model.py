@@ -13,6 +13,7 @@ class Project(BaseModel):
     created_at: AwareDatetime
     last_modified_at: AwareDatetime
     updates: Annotated[Mapping[str, Any], Field(default_factory=dict)]
+    config: Annotated[Mapping[str, Any] | None, Field(default=None)]
 
     @field_serializer("created_at", "last_modified_at")
     def dt_serializer(self, dt: AwareDatetime) -> str:

@@ -86,7 +86,10 @@ def _project_stat_dir(
 
 
 def project_stat(
-    qualibrate_path: Path, project: str, config_path: Path
+    qualibrate_path: Path,
+    project: str,
+    config_path: Path,
+    with_config: bool = False,
 ) -> Project:
     project_path = get_project_path(qualibrate_path, project)
 
@@ -117,6 +120,7 @@ def project_stat(
         created_at=created_at.astimezone(),
         last_modified_at=last_modified_at.astimezone(),
         updates=project_config,
+        config=config_dict if with_config else None,
     )
 
 
@@ -139,7 +143,9 @@ def verbose_list_projects(
 ) -> dict[str, Project]:
     qualibrate_path = config_path.parent
     return {
-        p_name: project_stat(qualibrate_path, p_name, config_path)
+        p_name: project_stat(
+            qualibrate_path, p_name, config_path, with_config=True
+        )
         for p_name in list_projects(qualibrate_path)
     }
 
