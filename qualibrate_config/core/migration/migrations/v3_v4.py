@@ -1,5 +1,5 @@
+import sys
 from copy import deepcopy
-from importlib.util import find_spec
 from pathlib import Path
 
 from qualibrate_config.core.migration.migrations.base import MigrateBase
@@ -22,13 +22,18 @@ class Migrate(MigrateBase):
         static_files = app.get("static_site_files")
         if static_files is not None:
             return {"qualibrate": qualibrate, **data}
-        app_module = find_spec("qualibrate_app")
-        if app_module is None or app_module.origin is None:
-            return {"qualibrate": qualibrate, **data}
-        module_path = Path(app_module.origin)
-        app["static_site_files"] = str(
-            module_path.parents[1] / "qualibrate_static"
-        )
+        # Walk sys.path to find qualibrate_app's install location. Nuitka-safe
+        # alternative to find_spec("qualibrate_app").origin (which returns a
+        # phantom path under obfuscated builds). Semantics preserved: find the
+        # qualibrate_app package dir, go up one level (to site-packages), and
+        # append "qualibrate_static".
+        for entry in sys.path:
+            qa_dir = Path(entry) / "qualibrate_app"
+            if qa_dir.is_dir():
+                app["static_site_files"] = str(
+                    qa_dir.parent / "qualibrate_static"
+                )
+                break
         return {"qualibrate": qualibrate, **data}
 
     @staticmethod

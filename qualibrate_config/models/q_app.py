@@ -1,4 +1,4 @@
-from importlib.util import find_spec
+import sys
 from pathlib import Path
 from typing import Annotated
 
@@ -12,10 +12,20 @@ __all__ = ["QualibrateAppConfig"]
 
 
 def get_default_static_path() -> Path | None:
-    app_module = find_spec("qualibrate.app")
-    if app_module is None or app_module.origin is None:
-        return None
-    return Path(app_module.origin).resolve().parent / "qualibrate_static"
+    """Locate the qualibrate frontend static files.
+
+    Walks sys.path (CPython's list of directories where packages live) rather
+    than relying on __file__ / find_spec().origin / importlib.resources, all
+    of which Nuitka's custom loader corrupts with phantom paths in obfuscated
+    builds. sys.path is maintained by CPython itself and Nuitka does not
+    intercept it, so this lookup works identically for source and compiled
+    installs.
+    """
+    for entry in sys.path:
+        candidate = Path(entry) / "qualibrate" / "app" / "qualibrate_static"
+        if candidate.is_dir():
+            return candidate
+    return None
 
 
 class QualibrateAppConfig(BaseConfig):
