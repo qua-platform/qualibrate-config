@@ -30,21 +30,35 @@ __all__ = ["create_command"]
 )
 @click.option(
     "--storage-location",
-    type=click.Path(file_okay=False, dir_okay=True, path_type=Path),
+    type=click.Path(
+        file_okay=False, dir_okay=True, resolve_path=True, path_type=Path
+    ),
     required=False,
     help=STORAGE_LOCATION_HELP,
 )
 @click.option(
     "--calibration-library-folder",
-    type=click.Path(file_okay=False, dir_okay=True, path_type=Path),
+    type=click.Path(
+        file_okay=False, dir_okay=True, resolve_path=True, path_type=Path
+    ),
     required=False,
     help=CALIBRATION_LIBRARY_FOLDER_HELP,
 )
 @click.option(
     "--quam-state-path",
-    type=click.Path(file_okay=False, dir_okay=True, path_type=Path),
+    type=click.Path(
+        file_okay=False, dir_okay=True, resolve_path=True, path_type=Path
+    ),
     required=False,
     help=QUAM_STATE_PATH_HELP,
+)
+@click.option(
+    "--yes",
+    "-y",
+    "assume_yes",
+    is_flag=True,
+    default=False,
+    help="Skip confirmation of expanded path values.",
 )
 @click.pass_context
 def create_command(
@@ -54,7 +68,21 @@ def create_command(
     storage_location: Path | None,
     calibration_library_folder: Path | None,
     quam_state_path: Path | None,
+    assume_yes: bool,
 ) -> None:
+    supplied_paths = [
+        ("--storage-location", storage_location),
+        ("--calibration-library-folder", calibration_library_folder),
+        ("--quam-state-path", quam_state_path),
+    ]
+    supplied_paths = [(flag, p) for flag, p in supplied_paths if p is not None]
+    if supplied_paths and not assume_yes:
+        click.echo("The following paths will be saved to the project config:")
+        for flag, p in supplied_paths:
+            click.echo(f"  {flag}: {p}")
+        if not click.confirm("Continue?", default=True):
+            click.secho("Aborted.", fg="yellow")
+            sys.exit(1)
     try:
         create_project(
             config_path,
