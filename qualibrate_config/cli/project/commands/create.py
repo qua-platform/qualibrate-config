@@ -75,11 +75,11 @@ def create_command(
         ("--calibration-library-folder", calibration_library_folder),
         ("--quam-state-path", quam_state_path),
     ]
-    supplied_paths = [(flag, p) for flag, p in supplied_paths if p is not None]
+    supplied_paths = [(flag, path) for flag, path in supplied_paths if path is not None]
     if supplied_paths and not assume_yes:
         click.echo("The following paths will be saved to the project config:")
-        for flag, p in supplied_paths:
-            click.echo(f"  {flag}: {p}")
+        for flag, path in supplied_paths:
+            click.echo(f"  {flag}: {path}")
         if not click.confirm("Continue?", default=True):
             click.secho("Aborted.", fg="yellow")
             sys.exit(1)
