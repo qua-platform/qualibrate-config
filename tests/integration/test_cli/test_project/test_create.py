@@ -59,6 +59,7 @@ def test_full_project_creation_pipeline(tmp_path):
         str(calibration_folder),
         "--quam-state-path",
         str(quam_state),
+        "--yes",
     ]
     print(f"{args = }")
     result = runner.invoke(create_command, args)
@@ -89,3 +90,94 @@ def test_full_project_creation_pipeline(tmp_path):
         calibration_folder
     )
     assert project_config["quam"]["state_path"] == str(quam_state)
+
+
+def test_relative_paths_are_expanded(tmp_path, monkeypatch):
+    runner = CliRunner()
+    config_path = tmp_path / "config.toml"
+    projects_path = tmp_path / "projects"
+    projects_path.mkdir()
+    cwd = tmp_path / "cwd"
+    cwd.mkdir()
+    monkeypatch.chdir(cwd)
+    new_project_name = "rel_project"
+    original_config = {
+        QUALIBRATE_CONFIG_KEY: {
+            "version": QualibrateConfig.version,
+            "project": "init_project",
+            "storage": {
+                "location": str(tmp_path / "old_storage"),
+                "type": "local_storage",
+            },
+            "calibration_library": {
+                "folder": str(tmp_path / "old_calibration"),
+                "resolver": "qualibrate.QualibrationLibrary",
+            },
+        },
+        QUAM_CONFIG_KEY: {QUAM_STATE_PATH_CONFIG_KEY: str(tmp_path / "qstate")},
+    }
+    with config_path.open("wb") as f:
+        tomli_w.dump(original_config, f)
+
+    args = [
+        new_project_name,
+        "--config-path",
+        str(config_path),
+        "--storage-location",
+        "../storage_rel",
+        "--calibration-library-folder",
+        "../calibration_rel",
+        "--quam-state-path",
+        "../quam_rel",
+        "--yes",
+    ]
+    result = runner.invoke(create_command, args)
+    assert result.exit_code == 0, result.output
+
+    project_config_file = projects_path / new_project_name / "config.toml"
+    with project_config_file.open("rb") as f:
+        project_config = tomllib.load(f)
+
+    expected_storage = str((cwd / ".." / "storage_rel").resolve())
+    expected_calibration = str((cwd / ".." / "calibration_rel").resolve())
+    expected_quam = str((cwd / ".." / "quam_rel").resolve())
+
+    assert (
+        project_config["qualibrate"]["storage"]["location"] == expected_storage
+    )
+    assert (
+        project_config["qualibrate"]["calibration_library"]["folder"]
+        == expected_calibration
+    )
+    assert project_config["quam"]["state_path"] == expected_quam
+
+
+def test_confirmation_prompt_can_be_declined(tmp_path):
+    runner = CliRunner()
+    config_path = tmp_path / "config.toml"
+    projects_path = tmp_path / "projects"
+    projects_path.mkdir()
+    original_config = {
+        QUALIBRATE_CONFIG_KEY: {
+            "version": QualibrateConfig.version,
+            "project": "init_project",
+            "storage": {
+                "location": str(tmp_path / "old_storage"),
+                "type": "local_storage",
+            },
+        },
+    }
+    with config_path.open("wb") as f:
+        tomli_w.dump(original_config, f)
+
+    args = [
+        "declined_project",
+        "--config-path",
+        str(config_path),
+        "--quam-state-path",
+        str(tmp_path / "quam"),
+    ]
+    result = runner.invoke(create_command, args, input="n\n")
+    assert result.exit_code == 1
+    assert "Aborted" in result.output
+    assert not (projects_path / "declined_project").exists()
