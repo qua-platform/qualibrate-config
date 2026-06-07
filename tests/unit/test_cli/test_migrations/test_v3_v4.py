@@ -1,6 +1,5 @@
+import sys
 from copy import deepcopy
-from importlib.util import find_spec
-from pathlib import Path
 
 from qualibrate_config.core.migration.migrations import v3_v4
 
@@ -79,14 +78,14 @@ def test_migrate_v4_v3_without_static_app_exists(mocker, tmp_path):
     config_v4 = deepcopy(CONFIG_V3)
     config_v4["qualibrate"]["version"] = 4
     config_v4["qualibrate"]["app"].pop("static_site_files")
-    config_spec = find_spec("qualibrate_config")
-    mocker.patch(
-        "qualibrate_config.core.migration.migrations.v3_v4.find_spec",
-        return_value=config_spec,
-    )
+    # Simulate `qualibrate_app` being installed at tmp_path by creating the
+    # package dir and pointing sys.path at tmp_path. The migration's sys.path
+    # walk will then find it and derive the static_site_files from its parent.
+    (tmp_path / "qualibrate_app").mkdir()
+    mocker.patch.object(sys, "path", [str(tmp_path)])
     config_v3_migrated = v3_v4.Migrate.backward(config_v4, tmp_path)
     config_v3_expected = deepcopy(CONFIG_V3)
     config_v3_expected["qualibrate"]["app"]["static_site_files"] = str(
-        Path(config_spec.origin).parents[1] / "qualibrate_static"
+        tmp_path / "qualibrate_static"
     )
     assert config_v3_expected == config_v3_migrated
