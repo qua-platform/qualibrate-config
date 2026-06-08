@@ -1,4 +1,3 @@
-import os
 import sys
 from pathlib import Path
 
@@ -10,7 +9,6 @@ from qualibrate_config.core.utils import recursive_update_dict
 from qualibrate_config.qulibrate_types import RawConfigType
 from qualibrate_config.references.resolvers import resolve_references
 from qualibrate_config.vars import (
-    CONFIG_PATH_ENV_NAME,
     DEFAULT_CONFIG_FILENAME,
     QUALIBRATE_CONFIG_KEY,
     QUALIBRATE_PATH,
@@ -45,9 +43,7 @@ def get_config_file(
 ) -> Path:
     if config_path is None:
         return _get_config_file_from_dir(
-            Path(os.environ.get(CONFIG_PATH_ENV_NAME, QUALIBRATE_PATH)),
-            default_config_specific_filename,
-            raise_not_exists,
+            QUALIBRATE_PATH, default_config_specific_filename, raise_not_exists
         )
     config_path_ = Path(config_path)
     if config_path_.is_file():
