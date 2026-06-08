@@ -1,3 +1,4 @@
+import os
 from pathlib import Path
 
 __all__ = [
@@ -15,7 +16,9 @@ QUALIBRATE_CONFIG_KEY = "qualibrate"
 QUAM_CONFIG_KEY = "quam"
 QUAM_STATE_PATH_CONFIG_KEY = "state_path"
 
-QUALIBRATE_PATH = Path().home() / ".qualibrate"
+QUALIBRATE_PATH = Path(
+    os.environ.get(CONFIG_PATH_ENV_NAME, Path().home() / ".qualibrate")
+)
 DEFAULT_CONFIG_FILENAME = "config.toml"
 
 DEFAULT_CONFIG_FILEPATH = QUALIBRATE_PATH / DEFAULT_CONFIG_FILENAME
