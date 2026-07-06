@@ -129,6 +129,12 @@ def _no_longer_used_msg(path: str) -> str:
 # Only exact leaf/subtree paths that are actually retired are listed here —
 # not the whole `app`/`runner` namespaces, since those may gain new,
 # unrelated settings in the future.
+# TODO: Remove in qualibrate-config 0.1.14, along with the fields/models
+# this validator warns about (see qualibrate_config/models/composite.py
+# and qualibrate_config/models/remote_services.py). Write a migration
+# that strips these unsupported entries (runner.address, runner.timeout,
+# app.static_site_files, composite.app, composite.runner) from existing
+# config files instead of silently ignoring them.
 DEPRECATED_SUBCONFIGS: tuple[tuple[tuple[str, ...], str], ...] = (
     (("runner", "address"), _no_longer_used_msg("runner.address")),
     (("runner", "timeout"), _no_longer_used_msg("runner.timeout")),

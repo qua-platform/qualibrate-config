@@ -17,6 +17,9 @@ class QualibrateCompositeConfig(BaseConfig):
     # `app`/`runner` spawn toggles are deprecated (no effect, see
     # `deprecated_subconfigs_validator`) and are no longer seeded by the
     # CLI, so they must be optional or a config without them fails to parse.
+    # TODO: Remove in qualibrate-config 0.1.14. Write a migration that
+    # drops `composite.app` and `composite.runner` from existing config
+    # files.
     app: QualibrateAppSubServiceConfig | None = None
     runner: QualibrateRunnerSubServiceConfig | None = None
     qua_dashboards: QuaDashboardSubServiceConfig
