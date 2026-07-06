@@ -97,9 +97,13 @@ def _get_calibration_library_config(
 def _get_app_config(
     ctx: click.Context, from_file: RawConfigType
 ) -> RawConfigType | None:
+    # `static_site_files` is deprecated in favor of
+    # `composite.static_site_files` (see `_get_composite_config`) — don't
+    # seed defaults into new configs, only carry through an explicitly
+    # passed or pre-existing value.
     args_mapping = {"app_static_site_files": "static_site_files"}
     # TODO: JsonTimelineDB
-    return get_optional_config(args_mapping, from_file, ctx)
+    return get_optional_config_only_if_passed(args_mapping, from_file, ctx)
 
 
 def _get_runner_config(
@@ -132,9 +136,13 @@ def _get_composite_config(
         from_file.get("qua_dashboards") if from_file is not None else None,
         ctx,
     )
-    result: RawConfigType = {
-        "qua_dashboards": (qua_dashboards or {"spawn": False})
-    }
+    result = cast(
+        RawConfigType,
+        get_optional_config(
+            {"static_site_files": "static_site_files"}, from_file, ctx
+        ),
+    )
+    result["qua_dashboards"] = qua_dashboards or {"spawn": False}
     if app:
         result["app"] = app
     if runner:

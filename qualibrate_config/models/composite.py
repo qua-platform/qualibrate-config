@@ -1,6 +1,9 @@
 from pathlib import Path
+from typing import Annotated
 
 from qualibrate_config.models.base.config_base import BaseConfig
+from qualibrate_config.models.base.default_value import DefaultConfigValue
+from qualibrate_config.models.q_app import get_default_static_path
 from qualibrate_config.models.remote_services import (
     QuaDashboardSubServiceConfig,
     QualibrateAppSubServiceConfig,
@@ -17,4 +20,6 @@ class QualibrateCompositeConfig(BaseConfig):
     app: QualibrateAppSubServiceConfig | None = None
     runner: QualibrateRunnerSubServiceConfig | None = None
     qua_dashboards: QuaDashboardSubServiceConfig
-    static_site_files: Path | None = None
+    static_site_files: Annotated[
+        Path | None, DefaultConfigValue(factory=get_default_static_path)
+    ] = None

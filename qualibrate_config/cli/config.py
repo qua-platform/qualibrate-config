@@ -201,6 +201,19 @@ __all__ = ["config_command"]
 @click.option(
     "--app-static-site-files",
     type=click.Path(file_okay=False, dir_okay=True, path_type=Path),
+    default=None,
+    cls=DeprecatedOption,
+    deprecated=("--app-static-site-files",),
+    preferred="--static-site-files",
+    help=(
+        "Deprecated. Use `--static-site-files` instead. Not written to "
+        "newly generated configs unless explicitly passed."
+    ),
+)
+@click.option(
+    "--static-site-files",
+    type=click.Path(file_okay=False, dir_okay=True, path_type=Path),
+    default=None,
     help="Path to the frontend build static files.",
 )
 @click.option(
@@ -240,7 +253,8 @@ def config_command(
     runner_address: str | None,
     runner_timeout: float | None,
     spawn_app: bool | None,
-    app_static_site_files: Path,
+    app_static_site_files: Path | None,
+    static_site_files: Path | None,
     spawn_qua_dashboards: bool,
     quam_state_path: Path | None,
     check_generator: bool,
