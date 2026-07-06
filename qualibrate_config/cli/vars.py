@@ -12,3 +12,8 @@ STORAGE_LOCATION_HELP = (
     "Path to the local user storage. Used for storing nodes output data."
 )
 QUAM_STATE_PATH_HELP = "Path to the quam state."
+SINGLE_BACKEND_DEPRECATION_MSG = (
+    "'{option}' is deprecated and no longer has any effect. Starting from "
+    "Qualibrate 1.5.0, is a single built-in backend and no longer "
+    "supports spawning or addressing an external app/runner service."
+)

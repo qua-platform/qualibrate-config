@@ -14,12 +14,12 @@ __all__ = ["DeprecatedOptionsCommand"]
 
 def _validate_deprecated_option(
     option: CoreOption,
-) -> tuple[Sequence[str], str]:
+) -> tuple[Sequence[str], str, str | None]:
     assert isinstance(option, DeprecatedOption)
     deprecated, preferred = option.deprecated_preferred
     msg = "Expected `deprecated` value for `{}`"
     assert deprecated is not None, msg.format(option.name)
-    return deprecated, preferred
+    return deprecated, preferred, option.message
 
 
 def make_deprecated_process(
@@ -28,7 +28,9 @@ def make_deprecated_process(
     """Construct a closure to the parser option processor"""
     option_instance = option.obj
     original_process = option.process
-    deprecated, preferred = _validate_deprecated_option(option_instance)
+    deprecated, preferred, message = _validate_deprecated_option(
+        option_instance
+    )
 
     def process(self: ParserOption, value: Any, state: ParsingState) -> None:
         """The function above us on the stack used 'opt' to
@@ -46,8 +48,11 @@ def make_deprecated_process(
         finally:
             del frame
         if opt in deprecated:
-            msg = "'{}' has been deprecated, use '{}'"
-            click.secho(msg.format(opt, preferred), fg="yellow")
+            if message is not None:
+                click.secho(message, fg="yellow")
+            else:
+                msg = "'{}' has been deprecated, use '{}'"
+                click.secho(msg.format(opt, preferred), fg="yellow")
 
         return original_process(value, state)
 

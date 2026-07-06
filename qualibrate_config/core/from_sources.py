@@ -9,6 +9,8 @@ __all__ = [
     "not_default",
     "get_config_by_args_mapping",
     "get_optional_config",
+    "get_config_by_args_mapping_only_if_passed",
+    "get_optional_config_only_if_passed",
     "qualibrate_config_from_sources",
 ]
 
@@ -43,6 +45,34 @@ def get_optional_config(
     return get_config_by_args_mapping(args_mapping, from_file or {}, ctx)
 
 
+def get_config_by_args_mapping_only_if_passed(
+    args_mapping: dict[str, str],
+    from_file: RawConfigType,
+    ctx: click.Context,
+) -> RawConfigType:
+    """Like `get_config_by_args_mapping`, but never seeds a default value
+    into a config that doesn't already have it — only an explicitly passed
+    CLI/env value is written. Used for deprecated options that should stop
+    appearing in freshly generated configs."""
+    params = list(
+        filter(lambda item: item[0] in args_mapping, ctx.params.items())
+    )
+    for arg_key, arg_value in params:
+        if not_default(ctx, arg_key):
+            from_file[args_mapping[arg_key]] = arg_value
+    return from_file
+
+
+def get_optional_config_only_if_passed(
+    args_mapping: dict[str, str],
+    from_file: RawConfigType | None,
+    ctx: click.Context,
+) -> RawConfigType:
+    return get_config_by_args_mapping_only_if_passed(
+        args_mapping, from_file or {}, ctx
+    )
+
+
 def _get_storage_config(
     ctx: click.Context, from_file: RawConfigType
 ) -> RawConfigType:
@@ -75,19 +105,24 @@ def _get_app_config(
 def _get_runner_config(
     ctx: click.Context, from_file: RawConfigType
 ) -> RawConfigType | None:
+    # `address`/`timeout` are deprecated (no effect) — don't seed defaults
+    # into new configs, only carry through an explicitly passed value.
     args_mapping = {"runner_address": "address", "runner_timeout": "timeout"}
-    return get_optional_config(args_mapping, from_file, ctx)
+    return get_optional_config_only_if_passed(args_mapping, from_file, ctx)
 
 
 def _get_composite_config(
     ctx: click.Context, from_file: RawConfigType | None
 ) -> RawConfigType | None:
-    app = get_optional_config(
+    # `app`/`runner` spawn toggles are deprecated (no effect) — don't seed
+    # defaults into new configs, only carry through an explicitly passed or
+    # pre-existing value.
+    app = get_optional_config_only_if_passed(
         {"spawn_app": "spawn"},
         from_file.get("app") if from_file is not None else None,
         ctx,
     )
-    runner = get_optional_config(
+    runner = get_optional_config_only_if_passed(
         {"spawn_runner": "spawn"},
         from_file.get("runner") if from_file is not None else None,
         ctx,
@@ -97,13 +132,14 @@ def _get_composite_config(
         from_file.get("qua_dashboards") if from_file is not None else None,
         ctx,
     )
-    if all(s is None for s in (app, runner, qua_dashboards)):
-        return None
-    return {
-        "app": (app or {"spawn": False}),
-        "runner": (runner or {"spawn": False}),
-        "qua_dashboards": (qua_dashboards or {"spawn": False}),
+    result: RawConfigType = {
+        "qua_dashboards": (qua_dashboards or {"spawn": False})
     }
+    if app:
+        result["app"] = app
+    if runner:
+        result["runner"] = runner
+    return result
 
 
 def qualibrate_config_from_sources(

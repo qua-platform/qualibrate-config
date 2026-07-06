@@ -4,6 +4,11 @@ from qualibrate_config import validation
 from qualibrate_config.models import QualibrateConfig
 
 
+@pytest.fixture(autouse=True)
+def _reset_deprecated_subconfigs_warned_state():
+    validation._WARNED_DEPRECATED_SUBCONFIGS.clear()
+
+
 def test_qualibrate_version_validator_no_qualibrate_skip():
     assert validation.qualibrate_version_validator({}) is None
 
@@ -88,3 +93,66 @@ def test_qualibrate_version_validator_valid():
         )
         is None
     )
+
+
+def test_deprecated_subconfigs_validator_none_present(capsys):
+    validation.deprecated_subconfigs_validator({"qualibrate": {"storage": {}}})
+    assert capsys.readouterr().out == ""
+
+
+def test_deprecated_subconfigs_validator_all_present(capsys):
+    validation.deprecated_subconfigs_validator(
+        {
+            "qualibrate": {
+                "app": {"static_site_files": "/tmp/static"},
+                "runner": {
+                    "address": "http://127.0.0.1:8001/execution/",
+                    "timeout": 1.0,
+                },
+                "composite": {
+                    "app": {"spawn": True},
+                    "runner": {"spawn": True},
+                },
+            }
+        }
+    )
+    out = capsys.readouterr().out
+    for path in (
+        "runner.address",
+        "runner.timeout",
+        "app.static_site_files",
+        "composite.app",
+        "composite.runner",
+    ):
+        assert path in out
+    assert "1.5.0" in out
+
+
+def test_deprecated_subconfigs_validator_warns_once_per_run(capsys):
+    config = {
+        "qualibrate": {
+            "runner": {"address": "http://127.0.0.1:8001/execution/"},
+        }
+    }
+    validation.deprecated_subconfigs_validator(config)
+    assert "runner.address" in capsys.readouterr().out
+
+    validation.deprecated_subconfigs_validator(config)
+    assert capsys.readouterr().out == ""
+
+
+def test_deprecated_subconfigs_validator_unrelated_app_settings_not_warned(
+    capsys,
+):
+    # `app`/`runner` namespaces may gain new, unrelated settings in the
+    # future — only the specific retired leaf paths should warn.
+    validation.deprecated_subconfigs_validator(
+        {
+            "qualibrate": {
+                "app": {"timeline_db": {"address": "x", "timeout": 1.0}},
+                "runner": {},
+                "composite": {"qua_dashboards": {"spawn": True}},
+            }
+        }
+    )
+    assert capsys.readouterr().out == ""
