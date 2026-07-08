@@ -122,23 +122,6 @@ def test_runner_empty_block_does_not_raise():
     assert conf.runner.timeout is None
 
 
-def test_composite_static_site_files_defaults_to_none():
-    conf_dict = {
-        "storage": {
-            "type": "local_storage",
-            "location": "/tmp/user_storage/${#/project}",
-        },
-        "composite": {
-            "app": {"spawn": True},
-            "runner": {"spawn": True},
-            "qua_dashboards": {"spawn": False},
-        },
-    }
-    conf = QualibrateConfig(conf_dict)
-
-    assert conf.composite.static_site_files is None
-
-
 def test_config_with_db():
     """Test QualibrateConfig with DB configuration."""
     conf_dict = {

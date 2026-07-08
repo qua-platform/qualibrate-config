@@ -45,6 +45,8 @@ class QualibrateRunnerRemoteServiceConfig(BaseConfig):
 
     @cached_property
     def address_with_root(self) -> str:
+        if self.address is None:
+            raise ValueError("address is not set")
         address = str(self.address)
         return address if address.endswith("/") else address + "/"
 
