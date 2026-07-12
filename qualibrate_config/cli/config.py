@@ -205,9 +205,15 @@ __all__ = ["config_command"]
     cls=DeprecatedOption,
     deprecated=("--app-static-site-files",),
     preferred="--static-site-files",
+    message=(
+        "'--app-static-site-files' should only be used for QUAlibrate "
+        "versions prior to 1.5.0, use '--static-site-files' instead "
+        "starting with 1.5.0."
+    ),
     help=(
-        "Deprecated. Use `--static-site-files` instead. Not written to "
-        "newly generated configs unless explicitly passed."
+        "Deprecated. Use `--static-site-files` instead starting with "
+        "QUAlibrate 1.5.0. Not written to newly generated configs unless "
+        "explicitly passed."
     ),
 )
 @click.option(

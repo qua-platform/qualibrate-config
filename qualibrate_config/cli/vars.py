@@ -13,7 +13,8 @@ STORAGE_LOCATION_HELP = (
 )
 QUAM_STATE_PATH_HELP = "Path to the quam state."
 SINGLE_BACKEND_DEPRECATION_MSG = (
-    "'{option}' is deprecated and no longer has any effect. As of "
-    "QUAlibrate 1.5.0, QUAlibrate runs as a single built-in backend and no "
-    "longer spawns or connects to a separate app/runner service."
+    "'{option}' is deprecated and will no longer have any effect starting "
+    "with QUAlibrate 1.5.0, when QUAlibrate runs as a single built-in "
+    "backend and no longer spawns or connects to a separate app/runner "
+    "service."
 )

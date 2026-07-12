@@ -147,11 +147,8 @@ def _get_composite_config(
         from_file.get("qua_dashboards") if from_file is not None else None,
         ctx,
     )
-    result = cast(
-        RawConfigType,
-        get_optional_config(
-            {"static_site_files": "static_site_files"}, from_file, ctx
-        ),
+    result = get_optional_config_only_if_passed(
+        {"static_site_files": "static_site_files"}, from_file, ctx
     )
     result["qua_dashboards"] = qua_dashboards or {"spawn": False}
     if app:

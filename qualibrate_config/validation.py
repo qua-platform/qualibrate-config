@@ -121,8 +121,8 @@ def qualibrate_version_validator(
 def _no_longer_used_msg(path: str) -> str:
     return (
         f"'{path}' is deprecated and will no longer be used starting with "
-        "QUAlibrate 1.5.0. It is preserved in your config file but "
-        "currently has no effect."
+        "QUAlibrate 1.5.0. It is preserved in your config file but will "
+        "have no effect from that version onward."
     )
 
 
@@ -158,9 +158,12 @@ def _path_present(data: RawConfigType, path: tuple[str, ...]) -> bool:
     return True
 
 
-# Paths already warned about in this run. `deprecated_subconfigs_validator`
-# can be invoked many times per process (e.g. once per config load), so this
-# is used to warn about each deprecated path only the first time it's seen.
+# Paths already warned about in this process, so that each deprecated path
+# is only warned about once even if `deprecated_subconfigs_validator` is
+# invoked multiple times (e.g. once per config load). Note this dedups by
+# path across *all* configs validated in the process, not per config file —
+# fine for the one-config-per-invocation CLI, but worth knowing in a
+# long-lived process that validates multiple distinct configs.
 _WARNED_DEPRECATED_SUBCONFIGS: set[tuple[str, ...]] = set()
 
 
