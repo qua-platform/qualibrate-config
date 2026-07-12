@@ -3,6 +3,9 @@ from typing import cast
 import click
 from click.core import ParameterSource
 
+from qualibrate_config.core.qualibrate_version import (
+    qualibrate_supports_single_backend,
+)
 from qualibrate_config.qulibrate_types import RawConfigType
 
 __all__ = [
@@ -120,7 +123,12 @@ def _get_composite_config(
 ) -> RawConfigType | None:
     # `app`/`runner` spawn toggles are deprecated (no effect) — don't seed
     # defaults into new configs, only carry through an explicitly passed or
-    # pre-existing value.
+    # pre-existing value. The one exception: if the installed `qualibrate`
+    # is older than 1.5.0 (or its version can't be determined), it still
+    # requires these subconfigs to be present, so default `spawn=True` for
+    # it below.
+    # TODO: Remove this fallback once qualibrate<1.5.0 no longer needs to
+    # be supported (see `qualibrate_supports_single_backend`).
     app = get_optional_config_only_if_passed(
         {"spawn_app": "spawn"},
         from_file.get("app") if from_file is not None else None,
@@ -131,6 +139,9 @@ def _get_composite_config(
         from_file.get("runner") if from_file is not None else None,
         ctx,
     )
+    if not qualibrate_supports_single_backend():
+        app.setdefault("spawn", True)
+        runner.setdefault("spawn", True)
     qua_dashboards = get_optional_config(
         {"spawn_qua_dashboards": "spawn"},
         from_file.get("qua_dashboards") if from_file is not None else None,
