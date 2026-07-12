@@ -118,6 +118,70 @@ def qualibrate_version_validator(
     )
 
 
+def _no_longer_used_msg(path: str) -> str:
+    return (
+        f"'{path}' is deprecated and will no longer be used starting with "
+        "QUAlibrate 1.5.0. It is preserved in your config file but will "
+        "have no effect from that version onward."
+    )
+
+
+# Only exact leaf/subtree paths that are actually retired are listed here —
+# not the whole `app`/`runner` namespaces, since those may gain new,
+# unrelated settings in the future.
+# TODO: Remove in qualibrate-config 0.2, along with the fields/models
+# this validator warns about (see qualibrate_config/models/composite.py
+# and qualibrate_config/models/remote_services.py). Write a migration
+# that strips these unsupported entries (runner.address, runner.timeout,
+# app.static_site_files, composite.app, composite.runner,
+# composite.qua_dashboards) from existing config files instead of silently
+# ignoring them.
+DEPRECATED_SUBCONFIGS: tuple[tuple[tuple[str, ...], str], ...] = (
+    (("runner", "address"), _no_longer_used_msg("runner.address")),
+    (("runner", "timeout"), _no_longer_used_msg("runner.timeout")),
+    (
+        ("app", "static_site_files"),
+        "'app.static_site_files' is deprecated in favor of "
+        "'composite.static_site_files' and will no longer be read starting "
+        "with QUAlibrate 1.5.0.",
+    ),
+    (("composite", "app"), _no_longer_used_msg("composite.app")),
+    (("composite", "runner"), _no_longer_used_msg("composite.runner")),
+    (
+        ("composite", "qua_dashboards"),
+        _no_longer_used_msg("composite.qua_dashboards"),
+    ),
+)
+
+
+def _path_present(data: RawConfigType, path: tuple[str, ...]) -> bool:
+    node: Any = data
+    for key in path:
+        if not isinstance(node, dict) or key not in node:
+            return False
+        node = node[key]
+    return True
+
+
+# Paths already warned about in this process, so that each deprecated path
+# is only warned about once even if `deprecated_subconfigs_validator` is
+# invoked multiple times (e.g. once per config load). Note this dedups by
+# path across *all* configs validated in the process, not per config file —
+# fine for the one-config-per-invocation CLI, but worth knowing in a
+# long-lived process that validates multiple distinct configs.
+_WARNED_DEPRECATED_SUBCONFIGS: set[tuple[str, ...]] = set()
+
+
+def deprecated_subconfigs_validator(config: RawConfigType) -> None:
+    qualibrate = config.get(QUALIBRATE_CONFIG_KEY, {})
+    for path, message in DEPRECATED_SUBCONFIGS:
+        if path in _WARNED_DEPRECATED_SUBCONFIGS:
+            continue
+        if _path_present(qualibrate, path):
+            _WARNED_DEPRECATED_SUBCONFIGS.add(path)
+            click.secho(message, fg="yellow")
+
+
 def validate_version_and_migrate_if_needed(
     common_config: dict[str, Any],
     config_path: Path,

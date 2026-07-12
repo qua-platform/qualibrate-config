@@ -15,6 +15,7 @@ from qualibrate_config.qulibrate_types import RawConfigType
 from qualibrate_config.validation import (
     GreaterThanSupportedQualibrateConfigVersionError,
     InvalidQualibrateConfigVersionError,
+    deprecated_subconfigs_validator,
     get_config_model_or_print_error,
     qualibrate_version_validator,
 )
@@ -162,7 +163,10 @@ def get_qualibrate_config(
     )
     try:
         model = get_config_model_part(
-            raw_config_validators=[qualibrate_version_validator]
+            raw_config_validators=[
+                qualibrate_version_validator,
+                deprecated_subconfigs_validator,
+            ]
         )
     except GreaterThanSupportedQualibrateConfigVersionError as ex:
         error_msg = (
@@ -182,7 +186,9 @@ def get_qualibrate_config(
         return model.qualibrate
     # migrated
     try:
-        model = get_config_model_part()
+        model = get_config_model_part(
+            raw_config_validators=[deprecated_subconfigs_validator]
+        )
     except (RuntimeError, ValueError) as ex:
         raise RuntimeError(common_error_msg) from ex
     return model.qualibrate

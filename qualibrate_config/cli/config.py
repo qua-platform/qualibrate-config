@@ -12,6 +12,7 @@ from qualibrate_config.cli.vars import (
     CALIBRATION_LIBRARY_FOLDER_HELP,
     CONFIG_PATH_HELP,
     QUAM_STATE_PATH_HELP,
+    SINGLE_BACKEND_DEPRECATION_MSG,
     STORAGE_LOCATION_HELP,
 )
 from qualibrate_config.core.content import (
@@ -144,59 +145,97 @@ __all__ = ["config_command"]
 @click.option(
     "--spawn-runner",
     type=bool,
-    default=True,
-    show_default=True,
+    default=None,
+    cls=DeprecatedOption,
+    deprecated=("--spawn-runner",),
+    message=SINGLE_BACKEND_DEPRECATION_MSG.format(option="--spawn-runner"),
     help=(
-        "This flag indicates whether the `qualibrate-runner` service should be "
-        "started. This service is designed to run nodes and graphs. The service"
-        " can be spawned independently."
+        "Deprecated, has no effect. Previously indicated whether the "
+        "`qualibrate-runner` service should be started independently. Not "
+        "set by default, and not written to newly generated configs unless "
+        "explicitly passed."
     ),
 )
 @click.option(
     "--runner-address",
     type=str,  # TODO: add type check for addr
-    default="http://127.0.0.1:8001/execution/",
-    show_default=True,
+    default=None,
+    cls=DeprecatedOption,
+    deprecated=("--runner-address",),
+    message=SINGLE_BACKEND_DEPRECATION_MSG.format(option="--runner-address"),
     help=(
-        "Address of `qualibrate-runner` service. If the service is spawned by "
-        "the `qualibrate` then the default address should be kept as is. If you"
-        " are running the service separately, you must specify its address."
+        "Deprecated, has no effect. Previously specified the address of an "
+        "externally spawned `qualibrate-runner` service. Not set by "
+        "default, and not written to newly generated configs unless "
+        "explicitly passed."
     ),
 )
 @click.option(
     "--runner-timeout",
     type=float,
-    default=1.0,
-    show_default=True,
+    default=None,
+    cls=DeprecatedOption,
+    deprecated=("--runner-timeout",),
+    message=SINGLE_BACKEND_DEPRECATION_MSG.format(option="--runner-timeout"),
     help=(
-        "Maximum waiting time for a response from the `qualibrate-runner` "
-        "service."
+        "Deprecated, has no effect. Previously specified the maximum "
+        "waiting time for a response from an externally spawned "
+        "`qualibrate-runner` service. Not set by default, and not written "
+        "to newly generated configs unless explicitly passed."
     ),
 )
 @click.option(
     "--spawn-app",
     type=bool,
-    default=True,
-    show_default=True,
+    default=None,
+    cls=DeprecatedOption,
+    deprecated=("--spawn-app",),
+    message=SINGLE_BACKEND_DEPRECATION_MSG.format(option="--spawn-app"),
     help=(
-        "This flag indicates whether the `qualibrate-app` service should be "
-        "started. This service is designed to getting info about snapshots. "
-        "The service can be spawned independently."
+        "Deprecated, has no effect. Previously indicated whether the "
+        "`qualibrate-app` service should be started independently. Not set "
+        "by default, and not written to newly generated configs unless "
+        "explicitly passed."
     ),
 )
 @click.option(
     "--app-static-site-files",
     type=click.Path(file_okay=False, dir_okay=True, path_type=Path),
+    default=None,
+    cls=DeprecatedOption,
+    deprecated=("--app-static-site-files",),
+    preferred="--static-site-files",
+    message=(
+        "'--app-static-site-files' should only be used for QUAlibrate "
+        "versions prior to 1.5.0, use '--static-site-files' instead "
+        "starting with 1.5.0."
+    ),
+    help=(
+        "Deprecated. Use `--static-site-files` instead starting with "
+        "QUAlibrate 1.5.0. Not written to newly generated configs unless "
+        "explicitly passed."
+    ),
+)
+@click.option(
+    "--static-site-files",
+    type=click.Path(file_okay=False, dir_okay=True, path_type=Path),
+    default=None,
     help="Path to the frontend build static files.",
 )
 @click.option(
     "--spawn-qua-dashboards",
     type=bool,
-    default=True,
-    show_default=True,
+    default=None,
+    cls=DeprecatedOption,
+    deprecated=("--spawn-qua-dashboards",),
+    message=SINGLE_BACKEND_DEPRECATION_MSG.format(
+        option="--spawn-qua-dashboards"
+    ),
     help=(
-        "This flag indicates whether the `qua-dashboards` service should be "
-        "started."
+        "Deprecated, has no effect. Previously indicated whether the "
+        "`qua-dashboards` service should be started independently. Not set "
+        "by default, and not written to newly generated configs unless "
+        "explicitly passed."
     ),
 )
 @click.option(
@@ -222,12 +261,13 @@ def config_command(
     storage_location: Path,
     calibration_library_resolver: str,
     calibration_library_folder: Path,
-    spawn_runner: bool,
-    runner_address: str,
-    runner_timeout: float,
-    spawn_app: bool,
-    app_static_site_files: Path,
-    spawn_qua_dashboards: bool,
+    spawn_runner: bool | None,
+    runner_address: str | None,
+    runner_timeout: float | None,
+    spawn_app: bool | None,
+    app_static_site_files: Path | None,
+    static_site_files: Path | None,
+    spawn_qua_dashboards: bool | None,
     quam_state_path: Path | None,
     check_generator: bool,
 ) -> None:
