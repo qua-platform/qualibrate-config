@@ -121,12 +121,12 @@ def _get_runner_config(
 def _get_composite_config(
     ctx: click.Context, from_file: RawConfigType | None
 ) -> RawConfigType | None:
-    # `app`/`runner` spawn toggles are deprecated (no effect) — don't seed
-    # defaults into new configs, only carry through an explicitly passed or
-    # pre-existing value. The one exception: if the installed `qualibrate`
-    # is older than 1.5.0 (or its version can't be determined), it still
-    # requires these subconfigs to be present, so default `spawn=True` for
-    # it below.
+    # `app`/`runner`/`qua_dashboards` spawn toggles are deprecated (no
+    # effect) — don't seed defaults into new configs, only carry through an
+    # explicitly passed or pre-existing value. The one exception: if the
+    # installed `qualibrate` is older than 1.5.0 (or its version can't be
+    # determined), it still requires these subconfigs to be present, so
+    # default `spawn=True` for it below.
     # TODO: Remove this fallback once qualibrate<1.5.0 no longer needs to
     # be supported (see `qualibrate_supports_single_backend`).
     app = get_optional_config_only_if_passed(
@@ -139,22 +139,24 @@ def _get_composite_config(
         from_file.get("runner") if from_file is not None else None,
         ctx,
     )
-    if not qualibrate_supports_single_backend():
-        app.setdefault("spawn", True)
-        runner.setdefault("spawn", True)
-    qua_dashboards = get_optional_config(
+    qua_dashboards = get_optional_config_only_if_passed(
         {"spawn_qua_dashboards": "spawn"},
         from_file.get("qua_dashboards") if from_file is not None else None,
         ctx,
     )
+    if not qualibrate_supports_single_backend():
+        app.setdefault("spawn", True)
+        runner.setdefault("spawn", True)
+        qua_dashboards.setdefault("spawn", True)
     result = get_optional_config_only_if_passed(
         {"static_site_files": "static_site_files"}, from_file, ctx
     )
-    result["qua_dashboards"] = qua_dashboards or {"spawn": False}
     if app:
         result["app"] = app
     if runner:
         result["runner"] = runner
+    if qua_dashboards:
+        result["qua_dashboards"] = qua_dashboards
     return result
 
 

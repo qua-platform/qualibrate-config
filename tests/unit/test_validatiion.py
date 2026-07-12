@@ -151,7 +151,7 @@ def test_deprecated_subconfigs_validator_unrelated_app_settings_not_warned(
             "qualibrate": {
                 "app": {"timeline_db": {"address": "x", "timeout": 1.0}},
                 "runner": {},
-                "composite": {"qua_dashboards": {"spawn": True}},
+                "composite": {"static_site_files": "/some/path"},
             }
         }
     )

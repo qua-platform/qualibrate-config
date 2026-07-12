@@ -37,7 +37,7 @@ class QualibrateRunnerRemoteServiceConfig(BaseConfig):
     # inheriting `RemoteServiceBaseConfig`'s required fields) so the
     # `runner` block can still be reused for future, unrelated settings
     # without requiring these two to be present.
-    # TODO: Remove in qualibrate-config 0.1.14. Write a migration that
+    # TODO: Remove in qualibrate-config 0.2. Write a migration that
     # drops `runner.address` and `runner.timeout` from existing config
     # files.
     address: str | None = None

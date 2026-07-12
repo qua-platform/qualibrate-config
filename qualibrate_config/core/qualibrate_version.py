@@ -4,7 +4,8 @@ from importlib.metadata import version as _pkg_version
 
 __all__ = ["qualibrate_supports_single_backend"]
 
-# TODO: Remove along with the rest of the `composite.app`/`composite.runner`
+# TODO: Remove along with the rest of the
+# `composite.app`/`composite.runner`/`composite.qua_dashboards`
 # spawn-seeding fallback once qualibrate<1.5.0 no longer needs to be
 # supported (see `_get_composite_config` in `core/from_sources.py`).
 SINGLE_BACKEND_MIN_QUALIBRATE_VERSION = (1, 5, 0)

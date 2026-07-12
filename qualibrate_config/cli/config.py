@@ -225,11 +225,17 @@ __all__ = ["config_command"]
 @click.option(
     "--spawn-qua-dashboards",
     type=bool,
-    default=True,
-    show_default=True,
+    default=None,
+    cls=DeprecatedOption,
+    deprecated=("--spawn-qua-dashboards",),
+    message=SINGLE_BACKEND_DEPRECATION_MSG.format(
+        option="--spawn-qua-dashboards"
+    ),
     help=(
-        "This flag indicates whether the `qua-dashboards` service should be "
-        "started."
+        "Deprecated, has no effect. Previously indicated whether the "
+        "`qua-dashboards` service should be started independently. Not set "
+        "by default, and not written to newly generated configs unless "
+        "explicitly passed."
     ),
 )
 @click.option(
@@ -261,7 +267,7 @@ def config_command(
     spawn_app: bool | None,
     app_static_site_files: Path | None,
     static_site_files: Path | None,
-    spawn_qua_dashboards: bool,
+    spawn_qua_dashboards: bool | None,
     quam_state_path: Path | None,
     check_generator: bool,
 ) -> None:
