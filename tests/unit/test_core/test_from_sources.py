@@ -12,9 +12,7 @@ def _make_ctx(params: dict) -> click.Context:
 
 
 class TestGetRunnerConfig:
-    def test_old_qualibrate_seeds_address_and_timeout_defaults(
-        self, mocker
-    ):
+    def test_old_qualibrate_seeds_address_and_timeout_defaults(self, mocker):
         mocker.patch(
             "qualibrate_config.core.from_sources.qualibrate_supports_single_backend",
             return_value=False,
