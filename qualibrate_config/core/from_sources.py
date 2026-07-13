@@ -112,10 +112,17 @@ def _get_app_config(
 def _get_runner_config(
     ctx: click.Context, from_file: RawConfigType
 ) -> RawConfigType | None:
-    # `address`/`timeout` are deprecated (no effect) — don't seed defaults
-    # into new configs, only carry through an explicitly passed value.
+    # `address`/`timeout` are deprecated (no effect on qualibrate>=1.5.0) —
+    # don't seed defaults into new configs, only carry through an explicitly
+    # passed value. Exception: qualibrate<1.5.0 reads these fields directly
+    # from the config and raises if they're absent, so seed the old defaults
+    # for those installations.
     args_mapping = {"runner_address": "address", "runner_timeout": "timeout"}
-    return get_optional_config_only_if_passed(args_mapping, from_file, ctx)
+    result = get_optional_config_only_if_passed(args_mapping, from_file, ctx)
+    if not qualibrate_supports_single_backend():
+        result.setdefault("address", "http://127.0.0.1:8001/execution/")
+        result.setdefault("timeout", 1.0)
+    return result
 
 
 def _get_composite_config(
