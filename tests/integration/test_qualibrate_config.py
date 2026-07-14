@@ -32,7 +32,7 @@ def test_minified_model():
     assert conf.composite is None
     assert conf.calibration_library is None
 
-    assert conf.version == 5
+    assert conf.version == 6
     assert conf.project == "init_project"
     assert conf.log_folder is None
     assert conf.storage.type == StorageType.local_storage
@@ -41,7 +41,7 @@ def test_minified_model():
 
 def test_full_model():
     conf_dict = {
-        "version": 5,
+        "version": 6,
         "project": "init_project",
         "log_folder": "/tmp/logs",
         "app": {"static_site_files": "/tmp/qualibrate_static"},
@@ -76,7 +76,7 @@ def test_full_model():
         conf.composite.qua_dashboards, QuaDashboardSubServiceConfig
     )
 
-    assert conf.version == 5
+    assert conf.version == 6
     assert conf.project == "init_project"
     assert conf.log_folder == Path("/tmp/logs")
     assert conf.app.static_site_files == Path("/tmp/qualibrate_static")
