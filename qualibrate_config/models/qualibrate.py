@@ -26,7 +26,9 @@ class QualibrateConfig(BaseConfig):
     storage: StorageConfig
     app: QualibrateAppConfig | None = None
     runner: QualibrateRunnerRemoteServiceConfig | None = None
-    composite: QualibrateCompositeConfig | None = None
+    # composite is required for qualibrate startup.
+    # use default values if not specified
+    composite: QualibrateCompositeConfig = QualibrateCompositeConfig({})
     calibration_library: CalibrationLibraryConfig | None = None
     database: DBConfig | None = None
     database_state: DatabaseStateConfig | None = None

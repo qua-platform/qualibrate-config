@@ -29,7 +29,10 @@ def test_minified_model():
     assert isinstance(conf.storage, StorageConfig)
     assert conf.app is None
     assert conf.runner is None
-    assert conf.composite is None
+    assert isinstance(conf.composite, QualibrateCompositeConfig)
+    assert conf.composite.app is None
+    assert conf.composite.runner is None
+    assert conf.composite.qua_dashboards is None
     assert conf.calibration_library is None
 
     assert conf.version == 6
