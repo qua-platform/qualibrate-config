@@ -15,7 +15,7 @@ import jsonpatch
 from pydantic import BaseModel, computed_field
 
 from qualibrate_config.core.project import create as create_m
-from qualibrate_config.models import PathSerializer
+from qualibrate_config.models import DBConfig, PathSerializer
 from qualibrate_config.vars import (
     QUALIBRATE_CONFIG_KEY,
     QUAM_CONFIG_KEY,
@@ -222,6 +222,18 @@ def test_config_for_project_from_args_sets_all(paths: Paths):
     )
     assert QUALIBRATE_CONFIG_KEY in result
     assert QUAM_CONFIG_KEY in result
+
+
+def test_fill_project_database_omits_none_credentials():
+    cfg: dict = {}
+    create_m.fill_project_database(
+        cfg, DBConfig({"host": "h", "port": 1, "database": "d"})
+    )
+    assert cfg[QUALIBRATE_CONFIG_KEY]["database"] == {
+        "host": "h",
+        "port": 1,
+        "database": "d",
+    }
 
 
 def test_config_for_project_from_args_raises_on_ctx():
