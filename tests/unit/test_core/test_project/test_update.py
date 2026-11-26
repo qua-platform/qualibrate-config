@@ -8,6 +8,7 @@ if sys.version_info[:2] < (3, 11):
 else:
     import tomllib
 
+from qualibrate_config.core.project import update as update_m
 from qualibrate_config.core.project.path import get_project_config_path
 from qualibrate_config.core.project.update import update_project
 from qualibrate_config.models import DatabaseStateConfig, DBConfig
@@ -118,8 +119,92 @@ def test_update_does_not_copy_global_config_into_project(
         database_state=DatabaseStateConfig({"is_connected": False}),
     )
 
-    data = _read(project_config_file)
-    assert "storage" not in data.get("qualibrate", {})
+    assert _read(project_config_file) == {
+        "qualibrate": {"database_state": {"is_connected": False}}
+    }
+
+
+def test_database_update_writes_credentials(
+    config_path: Path,
+    project_config_file: Path,
+) -> None:
+    update_project(
+        config_path,
+        PROJECT_NAME,
+        database=DBConfig(
+            {
+                "host": "db-host",
+                "port": 5432,
+                "database": "qm",
+                "username": "alice",
+                "password": "s3cret",
+            }
+        ),
+    )
+
+    assert _read(project_config_file)["qualibrate"]["database"] == {
+        "host": "db-host",
+        "port": 5432,
+        "database": "qm",
+        "username": "alice",
+        "password": "s3cret",
+    }
+
+
+def test_database_update_replaces_whole_section(
+    config_path: Path,
+    project_config_file: Path,
+) -> None:
+    # Same as before this branch: the database section is replaced, so
+    # credentials omitted from a later update are not kept.
+    update_project(
+        config_path,
+        PROJECT_NAME,
+        database=DBConfig(
+            {
+                "host": "db-host",
+                "port": 5432,
+                "database": "qm",
+                "username": "alice",
+                "password": "s3cret",
+            }
+        ),
+    )
+    update_project(
+        config_path,
+        PROJECT_NAME,
+        database=DBConfig({"host": "db-2", "port": 5433, "database": "qm2"}),
+    )
+
+    assert _read(project_config_file)["qualibrate"]["database"] == {
+        "host": "db-2",
+        "port": 5433,
+        "database": "qm2",
+    }
+
+
+def test_failed_update_keeps_original_file(
+    config_path: Path,
+    project_config_file: Path,
+    qualibrate_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    original = project_config_file.read_bytes()
+
+    def _fail(*_args: object, **_kwargs: object) -> None:
+        raise OSError("disk full")
+
+    monkeypatch.setattr(update_m, "after_create_project", _fail)
+
+    with pytest.raises(ValueError, match="Project update failed"):
+        update_project(
+            config_path,
+            PROJECT_NAME,
+            storage_location=qualibrate_path / "new_storage",
+        )
+
+    assert project_config_file.read_bytes() == original
+    assert not project_config_file.with_suffix(".tmp").exists()
 
 
 def test_update_missing_project_raises(config_path: Path) -> None:

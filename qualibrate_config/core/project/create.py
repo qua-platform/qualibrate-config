@@ -178,18 +178,15 @@ def fill_project_database(
     if database is None:
         return
     q_config = common_config.setdefault(QUALIBRATE_CONFIG_KEY, {})
-    # TOML has no null: optional credentials are omitted, not written as None.
-    q_config["database"] = {
-        key: value
-        for key, value in {
-            "host": database.host,
-            "port": database.port,
-            "database": database.database,
-            "username": database.username,
-            "password": database.password,
-        }.items()
-        if value is not None
+    db_fields = {
+        "host": database.host,
+        "port": database.port,
+        "database": database.database,
+        "username": database.username,
+        "password": database.password,
     }
+    # TOML has no null: optional credentials are omitted, not written as None.
+    q_config["database"] = {k: v for k, v in db_fields.items() if v is not None}
 
 
 def fill_project_database_state(
